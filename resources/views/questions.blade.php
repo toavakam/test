@@ -50,12 +50,12 @@
         <div class="alert alert-danger">
             <ul>
                 @foreach ($errors->all() as $error)
-                    @if(App::currentLocale()==="lv")
-                        <p>Ludzu izveleties atbildi</p>
-                        @elseif(App::currentLocale()==="en")
-                        <p>Please select an answer</p>
-                    @elseif(App::currentLocale()==="ru")
-                        <p>Пожалуйста выберите ответ</p>
+                    @if($error == __('messages.select_at_least_one_answer'))
+                        <p>{{ $error }}</p>
+                    @elseif($error == __('messages.duplicate_order_numbers'))
+                        <p>{{ $error }}</p>
+                    @elseif($error == __('messages.invalid_answer_selected'))
+                        <p>{{ $error }}</p>
                     @endif
                 @endforeach
             </ul>

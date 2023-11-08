@@ -56,11 +56,28 @@ class AttemptController extends Controller
 
         if ($question['type'] === 'single-choice') {
             $request->validate([
-                'answer' => 'required'
+                'answer' => 'required|in:' . implode(',', array_keys($question['answers']))
+            ], [
+                'answer.required' => __('messages.select_at_least_one_answer'),
+                'answer.in' => __('messages.invalid_answer_selected')
             ]);
+
         } elseif ($question['type'] === 'multiple-choice') {
+            $selectedAnswers = $request->input('a'.$question['id'], []);
+            $validAnswers = array_keys($question['answers']);
+
+            foreach ($selectedAnswers as $selectedAnswer) {
+                if (!in_array($selectedAnswer, $validAnswers)) {
+                    return redirect()->back()->withErrors([
+                        $question['id'] => __('messages.invalid_answer_selected')
+                    ]);
+                }
+            }
+
             $request->validate([
                 'a'.$question['id'] => 'required|array|min:1'
+            ], [
+                'a'.$question['id'].'.required' => __('messages.select_at_least_one_answer')
             ]);
 
         } elseif ($question['type'] === 'order') {
@@ -72,30 +89,38 @@ class AttemptController extends Controller
                     $correctOrder[$answer['id']] = $answer['order'];
                 }
             }
+            $validAnswerIds = array_column($question['answers'], 'id');
+            foreach ($selectedOrder as $answerId => $selectedPosition) {
+                if (!in_array($answerId, $validAnswerIds)) {
+                    return redirect()->back()->withErrors([
+                        $question['id'] => __('messages.invalid_answer_selected'),
+                    ]);
+                }
+            }
 
             $isCorrect = true;
 
-            if (empty(array_filter($selectedOrder))) {
+            $selectedOrder = array_filter($selectedOrder);
+
+            if (empty($selectedOrder)) {
                 return redirect()->back()->withErrors([
                     $question['id'] => __('messages.select_at_least_one_answer'),
                 ]);
-            } else {
-                $uniqueOrderNumbers = array_unique($selectedOrder);
-                if (count($selectedOrder) !== count($uniqueOrderNumbers)) {
-                    return redirect()->back()->withErrors([
-                        $question['id'] => __('messages.select_at_least_one_answer'),
-                    ]);
-                }
+            }
+            $uniqueOrderNumbers = array_unique($selectedOrder);
 
-                foreach ($selectedOrder as $answerId => $selectedPosition) {
-                    if (isset($correctOrder[$answerId]) && $selectedPosition != $correctOrder[$answerId]) {
-                        $isCorrect = false;
-                        break;
-                    }
+            if (count($selectedOrder) !== count($uniqueOrderNumbers)) {
+                return redirect()->back()->withErrors([
+                    $question['id'] => __('messages.duplicate_order_numbers'),
+                ]);
+            }
+            foreach ($selectedOrder as $answerId => $selectedPosition) {
+                if (isset($correctOrder[$answerId]) && $selectedPosition != $correctOrder[$answerId]) {
+                    $isCorrect = false;
+                    break;
                 }
             }
         }
-
 
         if ($question['type'] === 'single-choice') {
             $result = Result::where('attempt_id', $pk)
