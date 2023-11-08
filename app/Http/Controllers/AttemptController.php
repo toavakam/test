@@ -8,6 +8,8 @@ use App\Models\Test;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Validator;
+
 
 class AttemptController extends Controller
 {
@@ -17,23 +19,21 @@ class AttemptController extends Controller
         $test = $attempt->test;
         $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
 
-
         App::setLocale($lang);
 
         $questions = $test->getQuestions($lang);
 
-
-        if (! ($question = Arr::get($questions, $num - 1))) {
-            return redirect()->route('finish', ['pk' => $pk, 'lang'=>$lang]);
+        if (!($question = Arr::get($questions, $num - 1))) {
+            return redirect()->route('finish', ['pk' => $pk, 'lang' => $lang]);
         }
 
         $result = Result::where('attempt_id', $pk)
             ->where('question', $question['text'])
             ->first();
 
-        $userAnswer = $result ? $result->answer : null;
+        $userAnswer = old('a'.$question['id']) ?: ($result ? $result->answer : null);
 
-$bar = count($questions);
+        $bar = count($questions);
         $percentage = ($num / $bar) * 100;
 
         return view('questions', compact('question', 'pk', 'num', 'lang', 'test', 'userAnswer', 'bar', 'percentage'));
@@ -42,22 +42,62 @@ $bar = count($questions);
     public function PostAnswers(Request $request, $lang, int $pk, int $num = 1)
     {
 
+
         $attempt = Attempt::findOrFail($pk);
         $test = $attempt->test;
         $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
 
         App::setLocale($lang);
         $questions = $test->lv['questions'];
-        if (! ($question = Arr::get($questions, $num - 1))) {
+        if (!($question = Arr::get($questions, $num - 1))) {
             return redirect()->route('finish', ['pk' => $pk]);
         }
         $question = $questions[$num - 1];
 
-        if($question['type']==='single-choice') {
+        if ($question['type'] === 'single-choice') {
             $request->validate([
                 'answer' => 'required'
             ]);
+        } elseif ($question['type'] === 'multiple-choice') {
+            $request->validate([
+                'a'.$question['id'] => 'required|array|min:1'
+            ]);
 
+        } elseif ($question['type'] === 'order') {
+            $selectedOrder = $request->input($question['id'], []);
+            $correctOrder = [];
+
+            foreach ($question['answers'] as $answer) {
+                if (isset($answer['order'])) {
+                    $correctOrder[$answer['id']] = $answer['order'];
+                }
+            }
+
+            $isCorrect = true;
+
+            if (empty(array_filter($selectedOrder))) {
+                return redirect()->back()->withErrors([
+                    $question['id'] => __('messages.select_at_least_one_answer'),
+                ]);
+            } else {
+                $uniqueOrderNumbers = array_unique($selectedOrder);
+                if (count($selectedOrder) !== count($uniqueOrderNumbers)) {
+                    return redirect()->back()->withErrors([
+                        $question['id'] => __('messages.select_at_least_one_answer'),
+                    ]);
+                }
+
+                foreach ($selectedOrder as $answerId => $selectedPosition) {
+                    if (isset($correctOrder[$answerId]) && $selectedPosition != $correctOrder[$answerId]) {
+                        $isCorrect = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+
+        if ($question['type'] === 'single-choice') {
             $result = Result::where('attempt_id', $pk)
                 ->where('question', $question['text'])
                 ->first();
@@ -76,11 +116,7 @@ $bar = count($questions);
                 ]);
             }
         } elseif ($question['type'] === 'multiple-choice') {
-            $request->validate([
-                $question['id'] . '.*' => 'required'
-            ]);
-
-            $selectedAnswers = $request->input($question['id'], []);
+            $selectedAnswers = $request->input('a'.$question['id'], []);
             $correctAnswers = [];
 
             foreach ($question['answers'] as $answer) {
@@ -151,7 +187,7 @@ $bar = count($questions);
         }
         $correctAnswerCount = $attempt->result()->where('is_correct', true)->count();
 
-//        dd(Attempt::query()->where('id', $pk));
+
         $attempt->update(['correct_answer_count' => $correctAnswerCount]);
 
 

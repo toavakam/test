@@ -46,35 +46,32 @@
     <div class="progress bar" role="progressbar" aria-label="Basic example" aria-valuenow="{{$num}}" aria-valuemin="0" aria-valuemax="{{$bar}}">
         <div class="progress-bar" style="width: {{$percentage}}%"></div>
     </div>
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    @if(App::currentLocale()==="lv")
+                        <p>Ludzu izveleties atbildi</p>
+                        @elseif(App::currentLocale()==="en")
+                        <p>Please select an answer</p>
+                    @elseif(App::currentLocale()==="ru")
+                        <p>Пожалуйста выберите ответ</p>
+                    @endif
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <h2>{{ $question['text'] }}</h2>
     @if(isset($question['image']))
         <img src="{{ $question['image'] }}">
     @endif
     <p>{{ $question['description'] }}</p>
-
-    @if(isset($userAnswer))
-        @if($question['type'] === 'single-choice')
-            <input type="hidden" name="answer" value="{{ $userAnswer }}">
-        @elseif($question['type'] === 'multiple-choice')
-            @foreach($question['answers'] as $answer)
-
-                @if(in_array($answer['id'], $userAnswer))
-                    <input type="hidden" name="{{ $question['id'] }}[]" value="{{ $answer['id'] }}">
-                @endif
-            @endforeach
-        @elseif($question['type'] === 'order')
-            @foreach($userAnswer as $answerId => $position)
-                <input type="hidden" name="{{ $question['id'] }}[{{ $answerId }}]" value="{{ $position }}">
-            @endforeach
-        @endif
-    @endif
-
     @if($question['type'] === 'multiple-choice')
         <form method="post" action="{{ route('answer', ['pk' => $pk, 'num' => $num, 'lang'=>$lang]) }}">
             @csrf
             @foreach($question['answers'] as $answer)
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="answer_{{ $answer['id'] }}" name="{{ $question['id'] }}[]" value="{{ $answer['id'] }}"
+                    <input type="checkbox" class="form-check-input" id="answer_{{ $answer['id'] }}" name="a{{ $question['id'] }}[]" value="{{ $answer['id'] }}"
                            @if(isset($userAnswer) && in_array($answer['id'], $userAnswer)) checked @endif>
                     <label class="form-check-label" for="answer_{{ $answer['id'] }}">{{ $answer['value'] }}</label>
                 </div>
