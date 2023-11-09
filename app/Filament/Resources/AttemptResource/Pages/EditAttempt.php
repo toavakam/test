@@ -4,8 +4,9 @@ namespace App\Filament\Resources\AttemptResource\Pages;
 
 use App\Filament\Resources\AttemptResource;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\ViewRecord;
 
-class EditAttempt extends EditRecord
+class EditAttempt extends ViewRecord
 {
     protected static string $resource = AttemptResource::class;
 }
