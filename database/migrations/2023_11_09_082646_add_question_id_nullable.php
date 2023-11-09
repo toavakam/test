@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('results', function (Blueprint $table) {
-            $table->unsignedSmallInteger('question_id')->nullable()->change();
+            $table->unsignedSmallInteger('question_id')->nullable();
 
         });
     }
