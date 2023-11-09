@@ -15,6 +15,7 @@ class Result extends Model
     protected $fillable = [
         'attempt_id',
         'question',
+        'question_id',
         'answer',
         'is_correct',
     ];

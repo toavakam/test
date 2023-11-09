@@ -39,7 +39,7 @@ class ResultRelationManager extends RelationManager
 
                         $result = [];
                         foreach ($test->getQuestions('lv') as $question) {
-                            if (Arr::get($question, 'text') !== $model->question) {
+                            if (Arr::get($question, 'id') !== $model->question_id) {
                                 continue;
                             }
                             $allAnswers = Arr::get($question, 'answers', []);

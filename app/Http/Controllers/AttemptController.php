@@ -121,6 +121,7 @@ class AttemptController extends Controller
         if ($question['type'] === 'single-choice') {
             $result = Result::where('attempt_id', $pk)
                 ->where('question', $question['text'])
+                ->where('question_id', $question['id'])
                 ->first();
 
             if ($result) {
@@ -131,6 +132,7 @@ class AttemptController extends Controller
             } else {
                 Result::create([
                     'attempt_id' => $pk,
+                    'question_id'=> $question['id'],
                     'question' => $question['text'],
                     'answer' => $request->input('answer'),
                     'is_correct' => $question['answers'][$request->input('answer') - 1]['state'] == 1,
@@ -151,6 +153,7 @@ class AttemptController extends Controller
 
             $result = Result::where('attempt_id', $pk)
                 ->where('question', $question['text'])
+                ->where('question_id', $question['id'])
                 ->first();
 
             if ($result) {
@@ -161,6 +164,7 @@ class AttemptController extends Controller
             } else {
                 Result::create([
                     'attempt_id' => $pk,
+                    'question_id'=> $question['id'],
                     'question' => $question['text'],
                     'answer' => ($selectedAnswers),
                     'is_correct' => $isCorrect,
@@ -189,6 +193,7 @@ class AttemptController extends Controller
                 }
                 $result = Result::where('attempt_id', $pk)
                     ->where('question', $question['text'])
+                    ->where('question_id', $question['id'])
                     ->first();
 
                 if ($result) {
@@ -199,6 +204,7 @@ class AttemptController extends Controller
                 } else {
                     Result::create([
                         'attempt_id' => $pk,
+                        'question_id'=> $question['id'],
                         'question' => $question['text'],
                         'answer' => empty($selectedOrder) ? null : ($selectedOrder),
                         'is_correct' => $isCorrect,
