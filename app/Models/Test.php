@@ -15,7 +15,8 @@ class Test extends Model
         'eng' => 'array',
     ];
 
-    public function attemps(){
+    public function attemps()
+    {
         return $this->hasMany(Attempt::class, 'test_id', 'id');
     }
 
@@ -28,6 +29,7 @@ class Test extends Model
             default => null,
         };
     }
+
     public function getQuestionsTitle(string $lang): ?string
     {
         return match ($lang) {

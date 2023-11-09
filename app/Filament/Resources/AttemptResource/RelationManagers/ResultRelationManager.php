@@ -7,9 +7,7 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ResultRelationManager extends RelationManager
 {
@@ -34,7 +32,7 @@ class ResultRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('answer')
                     ->formatStateUsing(fn (Model $Result): string => ("{$Result->answer}")),
                 Tables\Columns\IconColumn::make('is_correct')
-                ->boolean()
+                    ->boolean(),
             ])
             ->filters([
 

@@ -4,16 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Attempt;
 use App\Models\Result;
-use App\Models\Test;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Validator;
-
 
 class AttemptController extends Controller
 {
-    public function question($lang=null, int $pk, int $num = 1)
+    public function question($lang, int $pk, int $num = 1)
     {
         $attempt = Attempt::findOrFail($pk);
         $test = $attempt->test;
@@ -23,7 +20,7 @@ class AttemptController extends Controller
 
         $questions = $test->getQuestions($lang);
 
-        if (!($question = Arr::get($questions, $num - 1))) {
+        if (! ($question = Arr::get($questions, $num - 1))) {
             return redirect()->route('finish', ['pk' => $pk, 'lang' => $lang]);
         }
 
@@ -42,24 +39,23 @@ class AttemptController extends Controller
     public function PostAnswers(Request $request, $lang, int $pk, int $num = 1)
     {
 
-
         $attempt = Attempt::findOrFail($pk);
         $test = $attempt->test;
         $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
 
         App::setLocale($lang);
         $questions = $test->lv['questions'];
-        if (!($question = Arr::get($questions, $num - 1))) {
+        if (! ($question = Arr::get($questions, $num - 1))) {
             return redirect()->route('finish', ['pk' => $pk]);
         }
         $question = $questions[$num - 1];
 
         if ($question['type'] === 'single-choice') {
             $request->validate([
-                'answer' => 'required|in:' . implode(',', array_keys($question['answers']))
+                'answer' => 'required|in:'.implode(',', array_keys($question['answers'])),
             ], [
                 'answer.required' => __('messages.select_at_least_one_answer'),
-                'answer.in' => __('messages.invalid_answer_selected')
+                'answer.in' => __('messages.invalid_answer_selected'),
             ]);
 
         } elseif ($question['type'] === 'multiple-choice') {
@@ -67,17 +63,17 @@ class AttemptController extends Controller
             $validAnswers = array_keys($question['answers']);
 
             foreach ($selectedAnswers as $selectedAnswer) {
-                if (!in_array($selectedAnswer, $validAnswers)) {
+                if (! in_array($selectedAnswer, $validAnswers)) {
                     return redirect()->back()->withErrors([
-                        $question['id'] => __('messages.invalid_answer_selected')
+                        $question['id'] => __('messages.invalid_answer_selected'),
                     ]);
                 }
             }
 
             $request->validate([
-                'a'.$question['id'] => 'required|array|min:1'
+                'a'.$question['id'] => 'required|array|min:1',
             ], [
-                'a'.$question['id'].'.required' => __('messages.select_at_least_one_answer')
+                'a'.$question['id'].'.required' => __('messages.select_at_least_one_answer'),
             ]);
 
         } elseif ($question['type'] === 'order') {
@@ -91,7 +87,7 @@ class AttemptController extends Controller
             }
             $validAnswerIds = array_column($question['answers'], 'id');
             foreach ($selectedOrder as $answerId => $selectedPosition) {
-                if (!in_array($answerId, $validAnswerIds)) {
+                if (! in_array($answerId, $validAnswerIds)) {
                     return redirect()->back()->withErrors([
                         $question['id'] => __('messages.invalid_answer_selected'),
                     ]);
@@ -212,15 +208,14 @@ class AttemptController extends Controller
         }
         $correctAnswerCount = $attempt->result()->where('is_correct', true)->count();
 
-
         $attempt->update(['correct_answer_count' => $correctAnswerCount]);
 
-
-
         $nextNum = $num + 1;
-        return redirect()->route('question', ['pk' => $pk, 'num' => $nextNum, 'lang'=>$lang]);
+
+        return redirect()->route('question', ['pk' => $pk, 'num' => $nextNum, 'lang' => $lang]);
     }
-    public function finish($lang = null, int $pk)
+
+    public function finish($lang, int $pk)
     {
         $attempt = Attempt::findOrFail($pk);
         $test = $attempt->test;
@@ -232,8 +227,6 @@ class AttemptController extends Controller
         $correctAnswerCount = $attempt->correct_answer_count;
         $percentage = round(($correctAnswerCount / $totalQuestions) * 100);
 
-
         return view('result', compact('pk', 'lang', 'test', 'percentage'));
     }
-
 }

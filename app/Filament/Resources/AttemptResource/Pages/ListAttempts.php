@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\AttemptResource\Pages;
 
 use App\Filament\Resources\AttemptResource;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
 class ListAttempts extends ListRecords

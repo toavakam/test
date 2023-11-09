@@ -9,17 +9,16 @@ use Illuminate\Support\Facades\App;
 
 class TestController extends Controller
 {
-    public function index($lang = null, int $pk)
+    public function index($lang, int $pk)
     {
         $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
         App::setLocale($lang);
         $test = Test::findOrFail($pk);
 
-
         return view('main', compact('test', 'lang', 'pk'));
     }
 
-    public function greet(Request $request, $lang = null, int $pk)
+    public function greet(Request $request, $lang, int $pk)
     {
         $test = Test::findOrFail($pk);
         $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
@@ -39,7 +38,7 @@ class TestController extends Controller
             'test_id' => $test->id,
         ]);
 
-        return to_route("question", ['pk'=>$attempt->id, 'num'=>1, 'lang'=>$lang]);
+        return to_route('question', ['pk' => $attempt->id, 'num' => 1, 'lang' => $lang]);
     }
 
     public function question(int $pk, int $num = 0)

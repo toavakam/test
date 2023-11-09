@@ -9,7 +9,8 @@ class Result extends Model
 {
     use HasFactory;
 
-    public function attemp(){
+    public function attemp()
+    {
         return $this->belongsTo(Attempt::class);
     }
 
@@ -17,11 +18,10 @@ class Result extends Model
         'attempt_id',
         'question',
         'answer',
-        'is_correct'
+        'is_correct',
     ];
+
     protected $casts = [
-        'answer' => 'array'
+        'answer' => 'array',
     ];
-
 }
-

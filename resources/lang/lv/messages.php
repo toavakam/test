@@ -1,4 +1,5 @@
 <?php
+
 return [
     'previous_question' => 'Iepriekšējais jautājums',
     'next_question' => 'Nākamais jautājums',
@@ -7,4 +8,3 @@ return [
     'invalid_answer_selected' => 'Nederīga atbilde ir izvēlēta.',
 
 ];
-

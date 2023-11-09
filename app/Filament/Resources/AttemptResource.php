@@ -5,13 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AttemptResource\Pages;
 use App\Filament\Resources\AttemptResource\RelationManagers;
 use App\Models\Attempt;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AttemptResource extends Resource
 {
@@ -34,7 +31,7 @@ class AttemptResource extends Resource
                 Tables\Columns\TextColumn::make('name'),
                 Tables\Columns\TextColumn::make('lastname'),
                 Tables\Columns\TextColumn::make('test.name')
-                ->label('Test Name'),
+                    ->label('Test Name'),
                 Tables\Columns\TextColumn::make('question_count'),
                 Tables\Columns\TextColumn::make('correct_answer_count'),
 
@@ -49,14 +46,14 @@ class AttemptResource extends Resource
 
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
-            RelationManagers\ResultRelationManager::class
+            RelationManagers\ResultRelationManager::class,
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -64,5 +61,5 @@ class AttemptResource extends Resource
             'create' => Pages\CreateAttempt::route('/create'),
             'edit' => Pages\EditAttempt::route('/{record}/edit'),
         ];
-    }    
+    }
 }
