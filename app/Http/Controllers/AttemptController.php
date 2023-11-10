@@ -14,26 +14,24 @@ class AttemptController extends Controller
     {
         $attempt = Attempt::findOrFail($pk);
         $test = $attempt->test;
-        $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
+        $lang = array_key_exists($lang, config('app.languages')) ? $lang : 'lv';
 
         App::setLocale($lang);
 
         $questions = $test->getQuestions($lang);
 
         if (! ($question = Arr::get($questions, $num - 1))) {
-            return redirect()->route('finish', ['pk' => $pk, 'lang' => $lang]);
+            return to_route('finish', ['pk' => $pk, 'lang' => $lang]);
         }
 
-        $result = Result::where('attempt_id', $pk)
-            ->where('question', $question['text'])
-            ->first();
+        $result = $attempt->result()->where('question', $question['text'])->first();
 
-        $userAnswer = old('a'.$question['id']) ?: ($result ? $result->answer : null);
+        $userAnswer = old('a'.$question['id'], $result?->answer);
 
         $bar = count($questions);
         $percentage = ($num / $bar) * 100;
 
-        return view('questions', compact('question', 'pk', 'num', 'lang', 'test', 'userAnswer', 'bar', 'percentage'));
+        return view('questions', compact('question', 'pk', 'num', 'lang', 'test', 'userAnswer', 'bar', 'percentage', 'attempt'));
     }
 
     public function PostAnswers(Request $request, $lang, int $pk, int $num = 1)

@@ -6,4 +6,8 @@ return [
     'select_at_least_one_answer' => 'Пожалуйста, выберите хотя бы один ответ.',
     'duplicate_order_numbers' => 'Дублированные порядковые номера не допускаются.',
     'invalid_answer_selected' => 'Выбран неверный ответ.',
+    'dashboard_title' => 'Введите имя и фамилию',
+    'dashboard_name' => 'Имя',
+    'dashboard_surname' => 'Фамилия',
+    'dashboard_button' => 'Начать тестирование',
 ];
