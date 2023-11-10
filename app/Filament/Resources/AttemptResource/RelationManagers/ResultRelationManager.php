@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\AttemptResource\RelationManagers;
 
-use App\Models\Result;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
@@ -47,7 +45,7 @@ class ResultRelationManager extends RelationManager
                             foreach ($allAnswers as $item) {
                                 if (in_array(Arr::get($item, 'id'), $answers, false)) {
                                     $prefix = Arr::get($question, 'type') === 'order' ? "$i. " : '';
-                                    $result[] = $prefix . Arr::get($item, 'value');
+                                    $result[] = $prefix.Arr::get($item, 'value');
                                     $i++;
                                 }
                             }

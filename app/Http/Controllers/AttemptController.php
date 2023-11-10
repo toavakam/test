@@ -130,7 +130,7 @@ class AttemptController extends Controller
             } else {
                 Result::create([
                     'attempt_id' => $pk,
-                    'question_id'=> $question['id'],
+                    'question_id' => $question['id'],
                     'question' => $question['text'],
                     'answer' => $request->input('answer'),
                     'is_correct' => $question['answers'][$request->input('answer') - 1]['state'] == 1,
@@ -162,7 +162,7 @@ class AttemptController extends Controller
             } else {
                 Result::create([
                     'attempt_id' => $pk,
-                    'question_id'=> $question['id'],
+                    'question_id' => $question['id'],
                     'question' => $question['text'],
                     'answer' => ($selectedAnswers),
                     'is_correct' => $isCorrect,
@@ -202,7 +202,7 @@ class AttemptController extends Controller
                 } else {
                     Result::create([
                         'attempt_id' => $pk,
-                        'question_id'=> $question['id'],
+                        'question_id' => $question['id'],
                         'question' => $question['text'],
                         'answer' => empty($selectedOrder) ? null : ($selectedOrder),
                         'is_correct' => $isCorrect,
