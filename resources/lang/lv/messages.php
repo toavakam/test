@@ -10,4 +10,7 @@ return [
     'dashboard_name' => 'Vārds',
     'dashboard_surname' => 'Uzvārds',
     'dashboard_button' => 'Sakt testēšanu',
+    'thank_you'=>'Paldies!',
+    'finish'=>'Jūsu tests ir pabeigts.',
+    'result'=>'Jūsu rezultāts:',
 ];

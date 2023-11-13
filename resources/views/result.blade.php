@@ -1,23 +1,7 @@
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Online Test - Finish</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <style>
-        .cont{
-            width: 100%;
-            max-width: 400px;
-            padding: 15px;
-            margin: auto;
-            padding-top: 10%;
-        }
-    </style>
-</head>
+<x-layout>
 <header>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
+        <div class="container">
             <a class="navbar-brand" href="#"><h2>{{$test->getQuestionsTitle($lang)}}</h2></a>
             <div>
                 <ul class="navbar-nav"@if(App::currentLocale()==="lv")
@@ -37,21 +21,9 @@
 </header>
 <body>
 <div class="cont justify-content-center">
-@if(App::currentLocale()==="en")
-<h1>Thank You!</h1>
-<h3>Your test has been completed.</h3>
-    <h2 style="color: blue">Your result: {{ $percentage }}%</h2>
-@elseif(App::currentLocale()==="lv")
-    <h1>Paldies!</h1>
-    <h3>Jusu tests ir pabeigts.</h3>
-        <h2 style="color: blue">Jusu rezultats: {{ $percentage }}%</h2>
-
-    @elseif(App::currentLocale()==="ru")
-        <h1>Спасибо!</h1>
-        <h3>Ваш тест завершен.</h3>
-        <h2 style="color: blue">Ваш результат: {{ $percentage }}%</h2>
-
-    @endif
+<h1>{{ __('messages.thank_you') }}</h1>
+<h3>{{ __('messages.finish') }}</h3>
+    <h2 style="color: blue">{{ __('messages.result') }} {{ $percentage }}%</h2>
 </div>
 </body>
-</html>
+</x-layout>

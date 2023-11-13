@@ -1,3 +1,4 @@
+@props(['question', 'pk', 'num', 'lang', 'userAnswer'])
 <h2>{{ $question['text'] }}</h2>
 @if(isset($question['image']))
     <img src="{{ $question['image'] }}">
@@ -12,8 +13,13 @@
             <label class="form-check-label" for="answer_{{ $answer['id'] }}">{{ $answer['value'] }}</label>
         </div>
     @endforeach
-    @if($num > 1)
-        <a href="{{ route('question', ['pk' => $pk, 'num' => $num - 1, 'lang' => $lang]) }}" class="btn btn-primary mt-4">{{ __('messages.previous_question') }}</a>
+    <div class="d-flex flex-row-reverse justify-content-between mt-4">
+        <button type="submit" class="btn btn-primary btn-lg">
+            {{ __('messages.next_question') }} &raquo;
+        </button>
+        @if($num > 1)
+            <a href="{{ route('question', ['pk' => $pk, 'num' => $num - 1, 'lang' => $lang]) }}" class="btn btn-primary btn-lg">
+                &laquo; {{ __('messages.previous_question') }}
+            </a>
     @endif
-    <button type="submit" class="btn btn-primary mt-4">{{ __('messages.next_question') }}</button>
 </form>

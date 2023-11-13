@@ -10,4 +10,8 @@ return [
     'dashboard_name' => 'First name',
     'dashboard_surname' => 'Last name',
     'dashboard_button' => 'Start testing',
+    'thank_you'=>'Thank You!',
+    'finish'=>'Your test has been completed.',
+    'result'=>'Your result:',
+
 ];

@@ -10,4 +10,7 @@ return [
     'dashboard_name' => 'Имя',
     'dashboard_surname' => 'Фамилия',
     'dashboard_button' => 'Начать тестирование',
+    'thank_you'=>'Спасибо!',
+    'finish'=>'Ваш тест завершен.',
+    'result'=>'Ваш результат:',
 ];
