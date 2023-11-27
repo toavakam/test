@@ -13,4 +13,7 @@ return [
     'thank_you'=>'Спасибо!',
     'finish'=>'Ваш тест завершен.',
     'result'=>'Ваш результат:',
+    'image_custom_field_empty'=>'Пожалуйтса, заполните все поля',
+    'image_custom_field_required'=>'Пожалуйтса, заполните все поля',
+
 ];

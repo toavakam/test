@@ -1,30 +1,28 @@
 <?php
 
 namespace App\View\Components;
-
 use App\Models\Attempt;
 use App\Models\Test;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\App;
 use Illuminate\View\Component;
 
-class Header extends Component
+class Footer extends Component
 {
+    
     public function __construct(
-        public ?Test $test = null,
-        public ?Attempt $attempt = null,
-        public ?int $number = null,
-    ) {
+    public ?Test $test = null,
+    public ?Attempt $attempt = null,
+    public ?int $number = null,)
+    {
     }
 
     public function render(): View
     {
-        return view('components.header', [
-            'lang' => App::currentLocale(),
-            'languageUrls' => $this->getLanguageMenu(),
-        ]);
+        return view('components.footer', [
+        'lang' => App::currentLocale(),
+        'languageUrls' => $this->getLanguageMenu(),]);
     }
-
     private function getLanguageMenu(): array
     {
         $result = [];

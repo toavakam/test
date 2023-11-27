@@ -22,8 +22,8 @@
 <body>
 @if($hasImageCustomQuestion)
     <div class="cont justify-content-center">
-        <h1>{{ __('messages.thank_you') }}</h1>
-        <h3>{{ __('messages.finish') }}</h3>
+        <h1 class="questiontext">{{ __('messages.thank_you') }}</h1>
+        <h3 class="questiondescrip">{{ __('messages.finish') }}</h3>
     </div>
 @else
     <div class="cont justify-content-center">

@@ -114,17 +114,24 @@ class AttemptController extends Controller
                 }
             }
         }if($question['type'] ==='image-custom') {
-        $validationRules = [];
-
-        foreach ($question['answers'] as $answer) {
-            $answerId = $answer['id'];
-            $validationRules["answer_$answerId"] = 'required|string';
+            $validationRules = [];
+            $customAnswers = [];
+        
+            foreach ($question['answers'] as $answer) {
+                $answerId = $answer['id'];
+                $validationRules["answer_$answerId"] = 'required|string';
+                $customAnswers[$answer['id']] = $request->input("answer_$answerId");
+            }
+            $request->validate($validationRules, [
+                'required' => __('messages.image_custom_field_required'),
+            ]);
+        
+            if (in_array('', $customAnswers)) {
+                return redirect()->back()->withErrors([
+                    $question['id'] => __('messages.image_custom_field_empty'),
+                ]);
         }
-        $request->validate($validationRules);
-
-
-        }
-
+    }
         if ($question['type'] === 'single-choice') {
             $result = Result::where('attempt_id', $pk)
                 ->where('question', $question['text'])

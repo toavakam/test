@@ -15,8 +15,36 @@
         @media (min-width: 576px) {
             .log-in {
                 max-width: 680px;
+                max-height: 700px; 
+            }
+            .card-title {
+                font-size: 40px;
+            }
+            .form-control {
+                height: 100px !important;
+            }
+            .form-select {
+                height: 100px !important;
+            }
+            .btn {
+                font-size: 35px; 
+            }
+            .questiontext{
+            font-size: 70px
+            }
+            .questiondescrip{
+            font-size: 40px
+            }
+            .orderlabel{
+                font-size: 30px;
+            }
+            .answerbtn{
+                font-size: 50px;
+                width: 100%;
             }
         }
+            
+        
         .cont {
             width: 100%;
             max-width: 1000px;
@@ -25,13 +53,19 @@
         }
         .bar {
             margin-bottom: 7%;
-            height: 5px;
+            height: 20px;
+        }
+        .lang{
+            font-size: 50px;
+        }
+        .btn-bottom{
+            height: 120px;
         }
     </style>
 </head>
 <body>
 
     {{ $slot }}
-
+    
 </body>
 </html>

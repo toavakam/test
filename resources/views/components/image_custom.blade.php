@@ -1,10 +1,9 @@
 @props(['question', 'pk', 'num', 'lang', 'userAnswer'])
-
-<h2>{{ $question['text'] }}</h2>
+<h1 class="questiontext">{{ $question['text'] }}</h1>
 @if(isset($question['image']))
     <img src="{{ $question['image'] }}" alt="Question Image">
 @endif
-<p>{{ $question['description'] }}</p>
+<p class="questiondescrip">{{ $question['description'] }}</p>
 
 <form method="post" action="{{ route('answer', ['pk' => $pk, 'num' => $num, 'lang'=>$lang]) }}">
     @csrf
@@ -19,9 +18,11 @@
             {{ __('messages.next_question') }} &raquo;
         </button>
         @if($num > 1)
+        <button class="btn btn-primary btn-bottom">
             <a href="{{ route('question', ['pk' => $pk, 'num' => $num - 1, 'lang' => $lang]) }}" class="btn btn-primary btn-lg">
                 &laquo; {{ __('messages.previous_question') }}
             </a>
+</button>
         @endif
     </div>
 </form>

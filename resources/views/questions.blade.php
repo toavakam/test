@@ -15,11 +15,11 @@
                 <ul class="mb-0">
                     @foreach ($errors->all() as $error)
                         @if($error === __('messages.select_at_least_one_answer'))
-                            <li>{{ $error }}</li>
+                            <li class="questiondescrip">{{ $error }}</li>
                         @elseif($error === __('messages.duplicate_order_numbers'))
-                            <li>{{ $error }}</li>
+                            <li class="questiondescrip">{{ $error }}</li>
                         @elseif($error === __('messages.invalid_answer_selected'))
-                            <li>{{ $error }}</li>
+                            <li class="questiondescrip">{{ $error }}</li>
                         @endif
                     @endforeach
                 </ul>
@@ -35,4 +35,7 @@
             <x-image_custom :question="$question" :pk="$pk" :num="$num" :lang="$lang" :userAnswer="$userAnswer" />
         @endif
     </div>
+   
+    <x-footer :test="$test" :attempt="$attempt" :number="$num" />
+
 </x-layout>
