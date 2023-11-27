@@ -36,4 +36,18 @@ class Test extends Model
             default => null,
         };
     }
+    public function hasImageCustomQuestion(): bool
+    {
+        foreach (['lv', 'ru', 'eng'] as $lang) {
+            $questions = $this->{$lang}['questions'] ?? [];
+
+            foreach ($questions as $question) {
+                if (isset($question['type']) && $question['type'] == 'image-custom') {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
+

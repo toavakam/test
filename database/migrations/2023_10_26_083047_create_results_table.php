@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('attempt_id');
             $table->string('question');
-            $table->string('answer');
+            $table->json('answer');
             $table->boolean('is_correct');
             $table->timestamps();
 

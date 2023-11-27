@@ -1,14 +1,17 @@
 @props(['question', 'pk', 'num', 'lang', 'userAnswer'])
+
 <h2>{{ $question['text'] }}</h2>
+@if(isset($question['image']))
+    <img src="{{ $question['image'] }}" alt="Question Image">
+@endif
 <p>{{ $question['description'] }}</p>
-<form method="post" action="{{ route('answer', ['pk' => $pk, 'num' => $num, 'lang'=> $lang]) }}">
+
+<form method="post" action="{{ route('answer', ['pk' => $pk, 'num' => $num, 'lang'=>$lang]) }}">
     @csrf
     @foreach($question['answers'] as $answer)
-        <div class="form-check">
-            <input type="radio" class="form-check-input" id="answer_{{ $answer['id'] }}" name="answer" value="{{ $answer['id'] }}" {{ old('answer', $userAnswer) == $answer['id'] ? 'checked' : '' }}>
-            <label class="form-check-label" for="answer_{{ $answer['id'] }}">
-                {{ $answer['value'] }}
-            </label>
+        <div class="form-group">
+            <label for="answer_{{ $answer['id'] }}">{{ $answer['value'] }}</label>
+            <input type="text" class="form-control" id="answer_{{ $answer['id'] }}" name="answer_{{ $answer['id'] }}" value="{{ old('answer_'.$answer['id'], $userAnswer[$answer['id']] ?? '') }}" required>
         </div>
     @endforeach
     <div class="d-flex flex-row-reverse justify-content-between mt-4">
@@ -22,4 +25,3 @@
         @endif
     </div>
 </form>
-

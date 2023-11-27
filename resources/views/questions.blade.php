@@ -31,6 +31,8 @@
             <x-multiple_choice_question :question="$question" :pk="$pk" :num="$num" :lang="$lang" :userAnswer="$userAnswer" />
         @elseif($question['type'] === 'order')
             <x-order_question :question="$question" :pk="$pk" :num="$num" :lang="$lang" :userAnswer="$userAnswer" />
+        @elseif($question['type'] === 'image-custom')
+            <x-image_custom :question="$question" :pk="$pk" :num="$num" :lang="$lang" :userAnswer="$userAnswer" />
         @endif
     </div>
 </x-layout>

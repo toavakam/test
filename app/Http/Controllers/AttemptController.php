@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attempt;
 use App\Models\Result;
+use App\Models\Test;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
@@ -24,10 +25,8 @@ class AttemptController extends Controller
             return to_route('finish', ['pk' => $pk, 'lang' => $lang]);
         }
 
-        $result = $attempt->result()->where('question', $question['text'])->first();
-
-        $userAnswer = old('a'.$question['id'], $result?->answer);
-
+        $result = $attempt->result()->where('question_id', $question['id'])->first();
+        $userAnswer = $result ? $result->answer : null;
         $bar = count($questions);
         $percentage = ($num / $bar) * 100;
 
@@ -114,6 +113,16 @@ class AttemptController extends Controller
                     break;
                 }
             }
+        }if($question['type'] ==='image-custom') {
+        $validationRules = [];
+
+        foreach ($question['answers'] as $answer) {
+            $answerId = $answer['id'];
+            $validationRules["answer_$answerId"] = 'required|string';
+        }
+        $request->validate($validationRules);
+
+
         }
 
         if ($question['type'] === 'single-choice') {
@@ -210,6 +219,33 @@ class AttemptController extends Controller
                 }
             }
         }
+        if ($question['type'] === 'image-custom') {
+        $result = Result::where('attempt_id', $pk)
+            ->where('question_id', $question['id'])
+            ->first();
+
+        $customAnswers = [];
+
+            foreach ($question['answers'] as $answer) {
+                $answerId = $answer['id'];
+                $customAnswers[$answer['id']] = $request->input("answer_$answerId");
+            }
+
+            if ($result) {
+                $result->update([
+                    'answer' => ($customAnswers),
+                    'is_correct' => false,
+                ]);
+            } else {
+                Result::create([
+                    'attempt_id' => $pk,
+                    'question_id' => $question['id'],
+                    'question' => $question['text'],
+                    'answer' => ($customAnswers),
+                    'is_correct' => false,
+                ]);
+            }
+        }
         $correctAnswerCount = $attempt->result()->where('is_correct', true)->count();
 
         $attempt->update(['correct_answer_count' => $correctAnswerCount]);
@@ -231,6 +267,9 @@ class AttemptController extends Controller
         $correctAnswerCount = $attempt->correct_answer_count;
         $percentage = round(($correctAnswerCount / $totalQuestions) * 100);
 
-        return view('result', compact('pk', 'lang', 'test', 'percentage'));
+
+        $hasImageCustomQuestion = $test->hasImageCustomQuestion();
+
+        return view('result', ['hasImageCustomQuestion' => $hasImageCustomQuestion], compact('pk', 'lang', 'test', 'percentage'));
     }
 }

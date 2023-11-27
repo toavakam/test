@@ -20,10 +20,17 @@
     </nav>
 </header>
 <body>
-<div class="cont justify-content-center">
-<h1>{{ __('messages.thank_you') }}</h1>
-<h3>{{ __('messages.finish') }}</h3>
-    <h2 style="color: blue">{{ __('messages.result') }} {{ $percentage }}%</h2>
-</div>
+@if($hasImageCustomQuestion)
+    <div class="cont justify-content-center">
+        <h1>{{ __('messages.thank_you') }}</h1>
+        <h3>{{ __('messages.finish') }}</h3>
+    </div>
+@else
+    <div class="cont justify-content-center">
+        <h1>{{ __('messages.thank_you') }}</h1>
+        <h3>{{ __('messages.finish') }}</h3>
+        <h2 style="color: blue">{{ __('messages.result') }} {{ $percentage }}%</h2>
+    </div>
+@endif
 </body>
 </x-layout>
