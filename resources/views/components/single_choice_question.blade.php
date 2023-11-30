@@ -16,11 +16,9 @@
             {{ __('messages.next_question') }} &raquo;
         </button>
         @if($num > 1)
-        <button class="btn btn-primary btn-bottom">
-            <a href="{{ route('question', ['pk' => $pk, 'num' => $num - 1, 'lang' => $lang]) }}" class="btn btn-primary btn-lg">
+            <a class="btn btn-primary btn-bottom d-flex align-items-center" href="{{ route('question', ['pk' => $pk, 'num' => $num - 1, 'lang' => $lang]) }}" class="btn btn-primary btn-lg">
                 &laquo; {{ __('messages.previous_question') }}
             </a>
-</button>
         @endif
     </div>
 </form>

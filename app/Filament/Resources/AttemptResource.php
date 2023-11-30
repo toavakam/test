@@ -33,6 +33,11 @@ class AttemptResource extends Resource
                     TextInput::make('name')->label('First name'),
 
                     TextInput::make('lastname')->label('Last name'),
+
+                    TextInput::make('question_count')->label('Result')
+                    ->formatStateUsing(function (Model $record): string {
+                        return "$record->correct_answer_count / $record->question_count";
+                    }),
                 ])->columns(2),
             ]);
     }

@@ -8,6 +8,8 @@ use App\Models\Test;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Validation\Rule;
+
 
 class AttemptController extends Controller
 {
@@ -23,6 +25,9 @@ class AttemptController extends Controller
 
         if (! ($question = Arr::get($questions, $num - 1))) {
             return to_route('finish', ['pk' => $pk, 'lang' => $lang]);
+        }
+        if (in_array($question['type'], ['single-choice', 'multiple-choice', 'order'])) {
+            shuffle($question['answers']);
         }
 
         $result = $attempt->result()->where('question_id', $question['id'])->first();
@@ -48,8 +53,13 @@ class AttemptController extends Controller
         $question = $questions[$num - 1];
 
         if ($question['type'] === 'single-choice') {
+            $answerIds = Arr::pluck($question['answers'], 'id');
+            
             $request->validate([
-                'answer' => 'required|in:'.implode(',', array_keys($question['answers'])),
+                'answer' => [
+                    'required',
+                    Rule::in($answerIds),
+                ],
             ], [
                 'answer.required' => __('messages.select_at_least_one_answer'),
                 'answer.in' => __('messages.invalid_answer_selected'),
@@ -57,16 +67,13 @@ class AttemptController extends Controller
 
         } elseif ($question['type'] === 'multiple-choice') {
             $selectedAnswers = $request->input('a'.$question['id'], []);
-            $validAnswers = array_keys($question['answers']);
-
-            foreach ($selectedAnswers as $selectedAnswer) {
-                if (! in_array($selectedAnswer, $validAnswers)) {
-                    return redirect()->back()->withErrors([
-                        $question['id'] => __('messages.invalid_answer_selected'),
-                    ]);
-                }
+            $validAnswerIds = Arr::pluck($question['answers'], 'id');
+            $invalidAnswers = array_diff($selectedAnswers, $validAnswerIds);
+            if (!empty($invalidAnswers)) {
+            return redirect()->back()->withErrors([
+            $question['id'] => __('messages.invalid_answer_selected'),
+            ]);
             }
-
             $request->validate([
                 'a'.$question['id'] => 'required|array|min:1',
             ], [
