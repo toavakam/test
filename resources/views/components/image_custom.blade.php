@@ -10,7 +10,7 @@
     @foreach($question['answers'] as $answer)
         <div class="form-group">
             <label for="answer_{{ $answer['id'] }}">{{ $answer['value'] }}</label>
-            <input type="text" class="form-control" id="answer_{{ $answer['id'] }}" name="answer_{{ $answer['id'] }}" value="{{ old('answer_'.$answer['id'], $userAnswer[$answer['id']] ?? '') }}" required>
+            <input type="text" class="form-control" id="answer_{{ $answer['id'] }}" name="answer_{{ $answer['id'] }}" value="{{ old('answer_'.$answer['id'], $userAnswer[$answer['id']] ?? '') }}">
         </div>
     @endforeach
     <div class="d-flex flex-row-reverse justify-content-between mt-4">

@@ -28,6 +28,8 @@ class TestController extends Controller
             'name' => 'required',
             'lastname' => 'required',
         ]);
+        $questions = $test->getQuestions($lang);
+        shuffle($questions);
 
         $attempt = Attempt::create([
             'name' => $request->input('name'),
@@ -36,13 +38,22 @@ class TestController extends Controller
             'question_count' => count($test->getQuestions($lang)),
             'correct_answer_count' => 0,
             'test_id' => $test->id,
+            'QuestionOrder' => $questions,
         ]);
 
         return to_route('question', ['pk' => $attempt->id, 'num' => 1, 'lang' => $lang]);
+
     }
 
     public function question(int $pk, int $num = 0)
     {
-        return view('questions');
+        $attempt = Attempt::findOrFail($pk);
+        $shuffledQuestions = $attempt->QuestionOrder;
+
+        if ($num > 0 && $num <= count($shuffledQuestions)) {
+            $currentQuestion = $shuffledQuestions[$num - 1];
+
+            return view('questions', compact('currentQuestion', 'num'));
+        }
     }
 }

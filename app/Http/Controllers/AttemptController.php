@@ -15,15 +15,16 @@ class AttemptController extends Controller
 {
     public function question($lang, int $pk, int $num = 1)
     {
+
         $attempt = Attempt::findOrFail($pk);
         $test = $attempt->test;
         $lang = array_key_exists($lang, config('app.languages')) ? $lang : 'lv';
 
         App::setLocale($lang);
 
-        $questions = $test->getQuestions($lang);
+        $shuffledQuestions = $attempt->QuestionOrder;
 
-        if (! ($question = Arr::get($questions, $num - 1))) {
+        if (! ($question = Arr::get($shuffledQuestions, $num - 1))) {
             return to_route('finish', ['pk' => $pk, 'lang' => $lang]);
         }
         if (in_array($question['type'], ['single-choice', 'multiple-choice', 'order'])) {
@@ -32,7 +33,7 @@ class AttemptController extends Controller
 
         $result = $attempt->result()->where('question_id', $question['id'])->first();
         $userAnswer = $result ? $result->answer : null;
-        $bar = count($questions);
+        $bar = count($shuffledQuestions);
         $percentage = ($num / $bar) * 100;
 
         return view('questions', compact('question', 'pk', 'num', 'lang', 'test', 'userAnswer', 'bar', 'percentage', 'attempt'));
@@ -46,7 +47,7 @@ class AttemptController extends Controller
         $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
 
         App::setLocale($lang);
-        $questions = $test->lv['questions'];
+        $questions =  $attempt->QuestionOrder;
         if (! ($question = Arr::get($questions, $num - 1))) {
             return redirect()->route('finish', ['pk' => $pk]);
         }
@@ -64,7 +65,6 @@ class AttemptController extends Controller
                 'answer.required' => __('messages.select_at_least_one_answer'),
                 'answer.in' => __('messages.invalid_answer_selected'),
             ]);
-
         } elseif ($question['type'] === 'multiple-choice') {
             $selectedAnswers = $request->input('a'.$question['id'], []);
             $validAnswerIds = Arr::pluck($question['answers'], 'id');
@@ -139,6 +139,7 @@ class AttemptController extends Controller
                 ]);
         }
     }
+
         if ($question['type'] === 'single-choice') {
             $result = Result::where('attempt_id', $pk)
                 ->where('question', $question['text'])
