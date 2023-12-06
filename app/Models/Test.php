@@ -36,6 +36,7 @@ class Test extends Model
             default => null,
         };
     }
+
     public function hasImageCustomQuestion(): bool
     {
         foreach (['lv', 'ru', 'eng'] as $lang) {
@@ -47,7 +48,7 @@ class Test extends Model
                 }
             }
         }
+
         return false;
     }
 }
-

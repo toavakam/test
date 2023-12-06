@@ -38,6 +38,4 @@
             <x-image_custom :question="$question" :pk="$pk" :num="$num" :lang="$lang" :userAnswer="$userAnswer" />
         @endif
     </div>
-    <x-footer :test="$test" :attempt="$attempt" :number="$num" />
-
 </x-layout>

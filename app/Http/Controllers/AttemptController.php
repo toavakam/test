@@ -4,12 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Attempt;
 use App\Models\Result;
-use App\Models\Test;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Validation\Rule;
-
 
 class AttemptController extends Controller
 {
@@ -47,7 +45,7 @@ class AttemptController extends Controller
         $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
 
         App::setLocale($lang);
-        $questions =  $attempt->QuestionOrder;
+        $questions = $attempt->QuestionOrder;
         if (! ($question = Arr::get($questions, $num - 1))) {
             return redirect()->route('finish', ['pk' => $pk]);
         }
@@ -55,7 +53,7 @@ class AttemptController extends Controller
 
         if ($question['type'] === 'single-choice') {
             $answerIds = Arr::pluck($question['answers'], 'id');
-            
+
             $request->validate([
                 'answer' => [
                     'required',
@@ -69,10 +67,10 @@ class AttemptController extends Controller
             $selectedAnswers = $request->input('a'.$question['id'], []);
             $validAnswerIds = Arr::pluck($question['answers'], 'id');
             $invalidAnswers = array_diff($selectedAnswers, $validAnswerIds);
-            if (!empty($invalidAnswers)) {
-            return redirect()->back()->withErrors([
-            $question['id'] => __('messages.invalid_answer_selected'),
-            ]);
+            if (! empty($invalidAnswers)) {
+                return redirect()->back()->withErrors([
+                    $question['id'] => __('messages.invalid_answer_selected'),
+                ]);
             }
             $request->validate([
                 'a'.$question['id'] => 'required|array|min:1',
@@ -120,10 +118,10 @@ class AttemptController extends Controller
                     break;
                 }
             }
-        }if($question['type'] ==='image-custom') {
+        }if ($question['type'] === 'image-custom') {
             $validationRules = [];
             $customAnswers = [];
-        
+
             foreach ($question['answers'] as $answer) {
                 $answerId = $answer['id'];
                 $validationRules["answer_$answerId"] = 'required|string';
@@ -132,13 +130,13 @@ class AttemptController extends Controller
             $request->validate($validationRules, [
                 'required' => __('messages.image_custom_field_required'),
             ]);
-        
+
             if (in_array('', $customAnswers)) {
                 return redirect()->back()->withErrors([
                     $question['id'] => __('messages.image_custom_field_empty'),
                 ]);
+            }
         }
-    }
 
         if ($question['type'] === 'single-choice') {
             $result = Result::where('attempt_id', $pk)
@@ -235,11 +233,11 @@ class AttemptController extends Controller
             }
         }
         if ($question['type'] === 'image-custom') {
-        $result = Result::where('attempt_id', $pk)
-            ->where('question_id', $question['id'])
-            ->first();
+            $result = Result::where('attempt_id', $pk)
+                ->where('question_id', $question['id'])
+                ->first();
 
-        $customAnswers = [];
+            $customAnswers = [];
 
             foreach ($question['answers'] as $answer) {
                 $answerId = $answer['id'];
@@ -281,7 +279,6 @@ class AttemptController extends Controller
         $totalQuestions = count($questions);
         $correctAnswerCount = $attempt->correct_answer_count;
         $percentage = round(($correctAnswerCount / $totalQuestions) * 100);
-
 
         $hasImageCustomQuestion = $test->hasImageCustomQuestion();
 
