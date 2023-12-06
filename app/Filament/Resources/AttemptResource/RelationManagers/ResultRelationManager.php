@@ -33,7 +33,6 @@ class ResultRelationManager extends RelationManager
                     ->formatStateUsing(function (string $state, Model $model): string {
                         $test = $model->attempt->QuestionOrder;
                         $answers = array_filter(array_values(Arr::wrap($model->answer)));
-
                         $result = [];
                         foreach ($test as $question) {
                             if (Arr::get($question, 'id') !== $model->question_id) {

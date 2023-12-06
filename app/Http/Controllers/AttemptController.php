@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\TestResult;
 use App\Models\Attempt;
 use App\Models\Result;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class AttemptController extends Controller
@@ -47,6 +49,9 @@ class AttemptController extends Controller
         App::setLocale($lang);
         $questions = $attempt->QuestionOrder;
         if (! ($question = Arr::get($questions, $num - 1))) {
+
+            //
+
             return redirect()->route('finish', ['pk' => $pk]);
         }
         $question = $questions[$num - 1];
@@ -281,6 +286,10 @@ class AttemptController extends Controller
         $percentage = round(($correctAnswerCount / $totalQuestions) * 100);
 
         $hasImageCustomQuestion = $test->hasImageCustomQuestion();
+        $testemail = 'toavakam@gmail.com';
+
+
+        Mail::to($testemail)->send(new TestResult($attempt, $lang));
 
         return view('result', ['hasImageCustomQuestion' => $hasImageCustomQuestion], compact('pk', 'lang', 'test', 'percentage'));
     }
