@@ -1,0 +1,20 @@
+
+<style>
+    .correct { color: green; }
+    .incorrect { color: red; }
+</style>
+<h1>{{ $attempt->test->getQuestionsTitle('lv') }}<br>
+    {{ $attempt->name }} {{ $attempt->lastname }}<br>
+    {{ $attempt->created_at }}
+</h1>
+@foreach ($formatAnswers as $index => $formatAnswer)
+    <h2>{{ $index + 1 }}. {{ $formatAnswer['question'] }}</h2>
+    <ul>
+        @php
+            $answerClass = $formatAnswer['isCorrect'] === 'Correct' ? 'correct' : 'incorrect';
+        @endphp
+        @foreach(explode('<br>', $formatAnswer['formatAnswer']) as $answer)
+            <li class="{{ $answerClass }}">{!! $answer !!}</li>
+        @endforeach
+    </ul>
+@endforeach

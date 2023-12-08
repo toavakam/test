@@ -277,6 +277,7 @@ class AttemptController extends Controller
 
     public function finish($lang, int $pk)
     {
+        try {
         $attempt = Attempt::findOrFail($pk);
         $test = $attempt->test;
         $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
@@ -293,6 +294,9 @@ class AttemptController extends Controller
 
         Mail::to($testemail)->send(new TestResult($attempt, $lang));
 
+        } catch (\Exception $e) {
+            \Log::error('Email sending failed: ' . $e->getMessage());
+        }
         return view('result', ['hasImageCustomQuestion' => $hasImageCustomQuestion], compact('pk', 'lang', 'test', 'percentage'));
     }
 }

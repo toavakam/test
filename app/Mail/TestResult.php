@@ -4,19 +4,24 @@ namespace App\Mail;
 
 use App\Models\Attempt;
 use App\Models\Test;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 
+
+
 class TestResult extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $formatAnswers;
     public function __construct(
         public Attempt $attempt, $lang
     ) {
@@ -37,14 +42,41 @@ class TestResult extends Mailable
      */
     public function content(): Content
     {
-        $test = $this->attempt->QuestionOrder;
-        
+        $this->formatAnswers = $this->formatAnswers();
 
+        return (new Content('email.test_results'))
+            ->with('formatAnswers', $this->formatAnswers);
+    }
+
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        $pdf = PDF::loadView('email.test_result_pdf', [
+            'attempt' => $this->attempt,
+            'formatAnswers' => $this->formatAnswers
+        ]);
+
+        $pdfContent = $pdf->output();
+
+        return [
+            Attachment::fromData(fn () => $pdfContent, 'Report.pdf')
+                ->withMime('application/pdf'),
+        ];
+    }
+    private function formatAnswers(): array
+    {
+        $test = $this->attempt->QuestionOrder;
+        $formattedAnswers = [];
 
         foreach ($this->attempt->result as $result) {
-
             $answers = array_filter(array_values(Arr::wrap($result->answer)));
             $formatAnswer = [];
+
             foreach ($test as $question) {
                 if (Arr::get($question, 'id') !== $result->question_id) {
                     continue;
@@ -57,6 +89,7 @@ class TestResult extends Mailable
                 } else {
                     $allAnswers = Arr::get($question, 'answers', []);
                     $i = 1;
+
                     foreach ($allAnswers as $item) {
                         if (in_array(Arr::get($item, 'id'), $answers, false)) {
                             $prefix = Arr::get($question, 'type') === 'order' ? "$i. " : '';
@@ -66,27 +99,13 @@ class TestResult extends Mailable
                     }
                 }
             }
-
-            $formatAnswers[] = [
+            $formattedAnswers[] = [
                 'question' => $result->question,
                 'formatAnswer' => implode('<br>', $formatAnswer),
                 'isCorrect' => $result->is_correct ? 'Correct' : 'Incorrect',
             ];
         }
 
-        return (new Content('email.test_results'))
-            ->with('formatAnswers', $formatAnswers);
+        return $formattedAnswers;
     }
-
-
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        return [];
-    }
-
 }
