@@ -49,6 +49,7 @@ class Header extends Component
                 ];
             }
         }
+
         return $result;
     }
 }

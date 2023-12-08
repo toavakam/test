@@ -191,4 +191,6 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+    'report_email' => env('REPORT_EMAIL')
+
 ];

@@ -30,9 +30,10 @@ class Attempt extends Model
         'question_count',
         'correct_answer_count',
         'test_id',
-        'QuestionOrder'
+        'QuestionOrder',
     ];
+
     protected $casts = [
         'QuestionOrder' => 'array',
-        ];
+    ];
 }
