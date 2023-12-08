@@ -1,8 +1,22 @@
-
 <style>
     .correct { color: green; }
     .incorrect { color: red; }
+    @font-face {
+        font-family: "DejaVu Sans";
+        font-style: normal;
+        font-weight: 400;
+        src: url("{{asset('fonts/DejaVuSans.ttf')}}");
+        src:
+        local("DejaVu Sans"),
+        local("DejaVu Sans"),
+        url("{{asset('fonts/DejaVuSans.ttf')}}") format("truetype");
+    }
+    body {
+        font-family: "DejaVu Sans";
+        font-size: 12px;
+    }
 </style>
+<body>
 <h1>{{ $attempt->test->getQuestionsTitle('lv') }}<br>
     {{ $attempt->name }} {{ $attempt->lastname }}<br>
     {{ $attempt->created_at }}
@@ -18,3 +32,4 @@
         @endforeach
     </ul>
 @endforeach
+</body>
