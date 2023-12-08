@@ -1,8 +1,15 @@
 {
     "dejavu sans": {
+<<<<<<< HEAD
         "bold": "\/var\/www\/test.bct.lv\/public_html\/vendor\/dompdf\/dompdf\/lib\/fonts\/DejaVuSans-Bold",
         "bold_italic": "\/var\/www\/test.bct.lv\/public_html\/vendor\/dompdf\/dompdf\/lib\/fonts\/DejaVuSans-BoldOblique",
         "italic": "\/var\/www\/test.bct.lv\/public_html\/vendor\/dompdf\/dompdf\/lib\/fonts\/DejaVuSans-Oblique",
         "normal": "dejavu_sans_normal_89e8db7b21c8d5e62f60e316d0ffa584"
+=======
+        "bold": "\/Users\/qwizzzyx\/Desktop\/Test\/vendor\/dompdf\/dompdf\/lib\/fonts\/DejaVuSans-Bold",
+        "bold_italic": "\/Users\/qwizzzyx\/Desktop\/Test\/vendor\/dompdf\/dompdf\/lib\/fonts\/DejaVuSans-BoldOblique",
+        "italic": "\/Users\/qwizzzyx\/Desktop\/Test\/vendor\/dompdf\/dompdf\/lib\/fonts\/DejaVuSans-Oblique",
+        "normal": "dejavu_sans_normal_b51a6adccb36722609ad7494bdb8e9d5"
+>>>>>>> 890000a3e10f5d5e0c2ad0a95a864d5dd262cab4
     }
 }

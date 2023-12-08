@@ -275,13 +275,14 @@ class AttemptController extends Controller
 
     public function finish($lang, int $pk)
     {
+
         // try {
             $attempt = Attempt::findOrFail($pk);
             $test = $attempt->test;
             $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
             App::setLocale($lang);
             $questions = $test->getQuestions($lang);
-            
+
             $totalQuestions = count($questions);
             $correctAnswerCount = $attempt->correct_answer_count;
             $percentage = round(($correctAnswerCount / $totalQuestions) * 100);
@@ -297,6 +298,7 @@ class AttemptController extends Controller
         // } catch (\Exception $e) {
         //     \Log::error('Email sending failed: ' . $e->getMessage());
         // }
+
         return view('result', ['hasImageCustomQuestion' => $hasImageCustomQuestion], compact('pk', 'lang', 'test', 'percentage'));
     }
 }
