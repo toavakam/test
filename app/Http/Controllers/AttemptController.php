@@ -25,6 +25,7 @@ class AttemptController extends Controller
         $shuffledQuestions = $attempt->QuestionOrder;
 
         if (! ($question = Arr::get($shuffledQuestions, $num - 1))) {
+            $this->sendTestResultEmail($attempt, $lang);
             return to_route('finish', ['pk' => $pk, 'lang' => $lang]);
         }
         if (in_array($question['type'], ['single-choice', 'multiple-choice', 'order'])) {
@@ -48,9 +49,9 @@ class AttemptController extends Controller
 
         App::setLocale($lang);
         $questions = $attempt->QuestionOrder;
+
         if (! ($question = Arr::get($questions, $num - 1))) {
 
-            //
 
             return redirect()->route('finish', ['pk' => $pk]);
         }
@@ -275,29 +276,30 @@ class AttemptController extends Controller
 
     public function finish($lang, int $pk)
     {
-        try {
+            $attempt = Attempt::findOrFail($pk);
 
-        $attempt = Attempt::findOrFail($pk);
-        $test = $attempt->test;
-        $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
-        App::setLocale($lang);
-        $questions = $test->getQuestions($lang);
+            $test = $attempt->test;
+            $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
+            App::setLocale($lang);
+            $questions = $test->getQuestions($lang);
 
 
             $totalQuestions = count($questions);
             $correctAnswerCount = $attempt->correct_answer_count;
             $percentage = round(($correctAnswerCount / $totalQuestions) * 100);
-
             $hasImageCustomQuestion = $test->hasImageCustomQuestion();
 
+
+
+        return view('result', ['hasImageCustomQuestion' => $hasImageCustomQuestion], compact('pk', 'lang', 'test', 'percentage'));
+    }
+    private function sendTestResultEmail(Attempt $attempt, string $lang)
+    {
+        try {
             $testemail = config('app.report_email');
-
             Mail::to($testemail)->send(new TestResult($attempt, $lang));
-
         } catch (\Exception $e) {
             \Log::error('Email sending failed: ' . $e->getMessage());
         }
-
-        return view('result', ['hasImageCustomQuestion' => $hasImageCustomQuestion], compact('pk', 'lang', 'test', 'percentage'));
     }
 }
