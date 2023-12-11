@@ -3,19 +3,6 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="#"><h2>{{$test->getQuestionsTitle($lang)}}</h2></a>
-            <div>
-                <ul class="navbar-nav"@if(App::currentLocale()==="lv")
-                    <li class="nav-item"><a class="nav-link" href="{{ route('finish', ['pk'=>$pk, 'lang' => 'en'])}}">English</a></li>
-                    <li class="nav-item"> <a class="nav-link" href="{{ route('finish', ['pk'=>$pk, 'lang' => 'ru'])}}">Русский</a></li>
-                @elseif(App::currentLocale()==="ru")
-                    <li class="nav-item"><a class="nav-link" href="{{ route('finish', ['pk'=>$pk, 'lang' => 'en'])}}">English</a></li>
-                    <li class="nav-item"> <a class="nav-link" href="{{ route('finish', ['pk'=>$pk, 'lang' => 'lv'])}}">Latviesu</a></li>
-                @elseif(App::currentLocale()==="en")
-                    <li class="nav-item"><a class="nav-link" href="{{ route('finish', ['pk'=>$pk, 'lang' => 'lv'])}}">Latviesu</a></li>
-                    <li class="nav-item"> <a class="nav-link" href="{{ route('finish', ['pk'=>$pk, 'lang' => 'ru'])}}">Русский</a></li>
-                    </ul>
-                @endif
-            </div>
         </div>
     </nav>
 </header>
