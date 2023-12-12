@@ -15,4 +15,6 @@ return [
     'result' => 'Jūsu rezultāts:',
     'image_custom_field_empty' => 'Lūdzu, aizpildiet visus ievades laukus',
     'image_custom_field_required' => 'Lūdzu, aizpildiet visus ievades laukus',
+    'home_title' => 'Lūdzu, izveleties testu',
+
 ];

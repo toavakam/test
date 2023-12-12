@@ -9,6 +9,21 @@ use Illuminate\Support\Facades\App;
 
 class TestController extends Controller
 {
+
+    public function home(Request $request, $lang = 'en')
+    {
+        $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
+        App::setLocale($lang);
+        
+        if ($request->isMethod('post')) {
+            $testId = $request->input('test');
+            return redirect()->route('dashboard', ['lang' => $lang, 'pk' => $testId]);
+        }
+        
+        $tests = Test::all();
+
+        return view('home', compact('tests'));
+    }
     public function index($lang, int $pk)
     {
         $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
@@ -17,6 +32,9 @@ class TestController extends Controller
 
         return view('main', compact('test', 'lang', 'pk'));
     }
+
+    
+
 
     public function greet(Request $request, $lang, int $pk)
     {

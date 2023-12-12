@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/{lang?}', [App\Http\Controllers\TestController::class, 'home'])->name('home');
 Route::get('/{lang}/test/{pk}', [App\Http\Controllers\TestController::class, 'index'])->name('dashboard');
 Route::post('{lang}/test/{pk}', [App\Http\Controllers\TestController::class, 'greet']);
 Route::get('{lang}/question/{pk}/{num?}', [App\Http\Controllers\AttemptController::class, 'question'])->name('question');

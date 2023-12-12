@@ -6,6 +6,8 @@ use App\Models\Attempt;
 use App\Models\Test;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Route;
 use Illuminate\View\Component;
 
 class Footer extends Component
@@ -25,30 +27,30 @@ class Footer extends Component
     }
 
     private function getLanguageMenu(): array
-    {
-        $result = [];
-        if ($this->attempt !== null && $this->number !== null) {
-            foreach (config('app.languages') as $code => $name) {
-                if ($code === App::currentLocale()) {
-                    continue;
-                }
-                $result[] = [
-                    route('question', ['lang' => $code, 'pk' => $this->attempt->id, 'num' => $this->number]),
-                    $name,
-                ];
-            }
-        } else {
-            foreach (config('app.languages') as $code => $name) {
-                if ($code === App::currentLocale()) {
-                    continue;
-                }
-                $result[] = [
-                    route('dashboard', ['lang' => $code, 'pk' => $this->test->id]),
-                    $name,
-                ];
-            }
+{
+    $lang = Request::input('lang');
+    $routeName = Route::currentRouteName();
+    $result = [];
+
+    foreach (config('app.languages') as $code => $name) {
+        if ($code === App::currentLocale()) {
+            continue;
         }
 
-        return $result;
+        if ($routeName === 'dashboard' && $this->test !== null) {
+            $params = ['lang' => $code, 'pk' => $this->test->id];
+        } else {
+            $params = ['lang' => $code, 'pk' => null];
+        }
+
+        $result[] = [
+            route($routeName, $params),
+            $name,
+        ];
     }
+
+    return $result;
+}
+
+
 }

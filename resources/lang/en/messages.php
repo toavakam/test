@@ -15,4 +15,6 @@ return [
     'result' => 'Your result:',
     'image_custom_field_empty' => 'Please fill all the input fields',
     'image_custom_field_required' => 'Please fill all the input fields',
+    'home_title' => 'Please select test',
+
 ];
