@@ -59,6 +59,6 @@ class TestController extends Controller
             'QuestionOrder' => $questions,
         ]);
 
-        return to_route('question', ['pk' => $attempt->id, 'num' => 1, 'lang' => $lang]);
+        return to_route('question', ['pk' => $attempt->id, 'num' => 1, 'lang' => App::currentLocale()]);
     }
 }

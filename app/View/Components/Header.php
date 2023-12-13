@@ -20,7 +20,6 @@ class Header extends Component
     public function render(): View
     {
         return view('components.header', [
-            'lang' => App::currentLocale(),
             'languageUrls' => $this->getLanguageMenu(),
         ]);
     }

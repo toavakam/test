@@ -10,6 +10,6 @@ Route::get('{lang}/test/{pk}', [TestController::class, 'index'])->name('dashboar
 Route::post('{lang}/test/{pk}', [TestController::class, 'greet']);
 
 Route::get('{lang}/question/{pk}/{num?}', [AttemptController::class, 'question'])->name('question');
-Route::post('{lang}/question/{pk}/{num?}', [AttemptController::class, 'PostAnswers'])->name('answer');
+Route::post('{lang}/question/{pk}/{num?}', [AttemptController::class, 'postAnswers'])->name('answer');
 
 Route::get('{lang}/finish/{pk}', [AttemptController::class, 'finish'])->name('finish');

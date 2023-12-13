@@ -9,12 +9,30 @@
                 @csrf
                 <h3 class="card-title mb-4">@lang('messages.dashboard_title')</h3>
                 <div class="form-floating relative mb-2">
-                    <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" placeholder="@lang('messages.dashboard_name')" required>
+                    <input type="text"
+                           @class(['form-control', 'is-invalid' => $errors->has('name')])
+                           id="name"
+                           name="name"
+                           value="{{ old('name') }}"
+                           placeholder="@lang('messages.dashboard_name')"
+                           required>
                     <label for="name">@lang('messages.dashboard_name')</label>
+                    @error('name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="form-floating relative mb-2">
-                    <input type="text" class="form-control" id="lastname" name="lastname" value="{{ old('lastname') }}" placeholder="@lang('messages.dashboard_surname')" required>
+                    <input type="text"
+                           @class(['form-control', 'is-invalid' => $errors->has('lastname')])
+                           id="lastname"
+                           name="lastname"
+                           value="{{ old('lastname') }}"
+                           placeholder="@lang('messages.dashboard_surname')"
+                           required>
                     <label for="lastname">@lang('messages.dashboard_surname')</label>
+                    @error('lastname')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="d-grid">
                     <button type="submit" class="btn btn-primary">

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Arr;
 
 class Test extends Model
 {
@@ -12,9 +14,9 @@ class Test extends Model
         'eng' => 'array',
     ];
 
-    public function attemps()
+    public function attemps(): HasMany
     {
-        return $this->hasMany(Attempt::class, 'test_id', 'id');
+        return $this->hasMany(Attempt::class);
     }
 
     public function getQuestions(string $lang): ?array
@@ -40,10 +42,9 @@ class Test extends Model
     public function hasImageCustomQuestion(): bool
     {
         foreach (['lv', 'ru', 'eng'] as $lang) {
-            $questions = $this->{$lang}['questions'] ?? [];
-
+            $questions = Arr::get($this->{$lang}, 'questions', []);
             foreach ($questions as $question) {
-                if (isset($question['type']) && $question['type'] == 'image-custom') {
+                if (isset($question['type']) && $question['type'] === 'image-custom') {
                     return true;
                 }
             }

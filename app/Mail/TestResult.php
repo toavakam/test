@@ -16,12 +16,13 @@ class TestResult extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $formatAnswers;
+    public array $formatAnswers;
 
     public function __construct(
-        public Attempt $attempt, $lang
+        public Attempt $attempt,
+        string $lang,
     ) {
-
+        $this->formatAnswers = $this->formatAnswers();
     }
 
     public function envelope(): Envelope
@@ -31,25 +32,12 @@ class TestResult extends Mailable
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
-        $this->formatAnswers = $this->formatAnswers();
-
         return (new Content('email.test_results'))
             ->with('formatAnswers', $this->formatAnswers);
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
     public function attachments(): array
     {
         $pdf = PDF::loadView('email.test_result_pdf', [
@@ -60,7 +48,7 @@ class TestResult extends Mailable
         $pdfContent = $pdf->output();
 
         return [
-            Attachment::fromData(fn () => $pdfContent, 'Report.pdf')
+            Attachment::fromData(static fn () => $pdfContent, 'Report.pdf')
                 ->withMime('application/pdf'),
         ];
     }

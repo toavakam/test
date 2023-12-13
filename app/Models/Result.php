@@ -3,14 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Result extends Model
 {
-    public function attempt()
-    {
-        return $this->belongsTo(Attempt::class);
-    }
-
     protected $fillable = [
         'attempt_id',
         'question',
@@ -22,4 +18,9 @@ class Result extends Model
     protected $casts = [
         'answer' => 'array',
     ];
+
+    public function attempt(): BelongsTo
+    {
+        return $this->belongsTo(Attempt::class);
+    }
 }

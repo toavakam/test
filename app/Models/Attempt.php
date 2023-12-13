@@ -2,27 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property array $QuestionOrder
+ */
 class Attempt extends Model
 {
-    use HasFactory;
-
-    public static function where(string $string, int $pk)
-    {
-    }
-
-    public function test()
-    {
-        return $this->belongsTo(Test::class, 'test_id', 'id');
-    }
-
-    public function result()
-    {
-        return $this->hasMany(Result::class, 'attempt_id', 'id');
-    }
-
     protected $fillable = [
         'name',
         'lastname',
@@ -36,4 +24,14 @@ class Attempt extends Model
     protected $casts = [
         'QuestionOrder' => 'array',
     ];
+
+    public function test(): BelongsTo
+    {
+        return $this->belongsTo(Test::class);
+    }
+
+    public function result(): HasMany
+    {
+        return $this->hasMany(Result::class);
+    }
 }

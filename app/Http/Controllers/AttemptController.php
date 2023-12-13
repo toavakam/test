@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Mail\TestResult;
 use App\Models\Attempt;
 use App\Models\Result;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
@@ -18,286 +20,228 @@ class AttemptController extends Controller
         $this->setCurrentLocale($lang);
 
         $attempt = Attempt::findOrFail($pk);
-        $test = $attempt->test;
 
-        $shuffledQuestions = $attempt->QuestionOrder;
+        if (! ($question = Arr::get($attempt->QuestionOrder, $num - 1))) {
+            $this->sendTestResultEmail($attempt);
 
-        if (! ($question = Arr::get($shuffledQuestions, $num - 1))) {
-            $this->sendTestResultEmail($attempt, $lang);
-
-            return to_route('finish', ['pk' => $pk, 'lang' => $lang]);
+            return to_route('finish', ['pk' => $pk, 'lang' => App::currentLocale()]);
         }
 
         if (in_array($question['type'], ['single-choice', 'multiple-choice', 'order'])) {
             shuffle($question['answers']);
         }
 
-        $userAnswer = $attempt->result()->where('question_id', $question['id'])->first()?->answer;
-
-        $bar = count($shuffledQuestions);
-        $percentage = $bar ? ($num / $bar) * 100 : 0;
-
-        return view('questions', compact('question', 'pk', 'num', 'lang', 'test', 'userAnswer', 'bar', 'percentage', 'attempt'));
+        return view('questions', [
+            'attempt' => $attempt,
+            'question' => $question,
+            'num' => $num,
+            'userAnswer' => $attempt->result()->where('question_id', $question['id'])->first()?->answer,
+            'questionCount' => count($attempt->QuestionOrder),
+            'percentage' => $attempt->QuestionOrder ? ($num / count($attempt->QuestionOrder)) * 100 : 0,
+        ]);
     }
 
-    public function PostAnswers(Request $request, $lang, int $pk, int $num = 1)
+    public function postAnswers(Request $request, string $lang, int $pk, int $num = 1): RedirectResponse
     {
+        $this->setCurrentLocale($lang);
 
         $attempt = Attempt::findOrFail($pk);
-        $test = $attempt->test;
-        $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
 
-        App::setLocale($lang);
-        $questions = $attempt->QuestionOrder;
-
-        if (! ($question = Arr::get($questions, $num - 1))) {
+        $question = Arr::get($attempt->QuestionOrder, $num - 1);
+        if (! $question) {
+            $this->sendTestResultEmail($attempt);
 
             return redirect()->route('finish', ['pk' => $pk]);
         }
-        $question = $questions[$num - 1];
 
         if ($question['type'] === 'single-choice') {
-            $answerIds = Arr::pluck($question['answers'], 'id');
+            $this->processSingleChoiceQuestion($request, $attempt, $question);
 
-            $request->validate([
-                'answer' => [
-                    'required',
-                    Rule::in($answerIds),
-                ],
-            ], [
-                'answer.required' => __('messages.select_at_least_one_answer'),
-                'answer.in' => __('messages.invalid_answer_selected'),
-            ]);
         } elseif ($question['type'] === 'multiple-choice') {
-            $selectedAnswers = $request->input('a'.$question['id'], []);
-            $validAnswerIds = Arr::pluck($question['answers'], 'id');
-            $invalidAnswers = array_diff($selectedAnswers, $validAnswerIds);
-            if (! empty($invalidAnswers)) {
-                return redirect()->back()->withErrors([
-                    $question['id'] => __('messages.invalid_answer_selected'),
+
+            if ($error = $this->processMultiChoiceQuestion($request, $attempt, $question)) {
+                return back()->withErrors([
+                    $question['id'] => $error,
                 ]);
             }
-            $request->validate([
-                'a'.$question['id'] => 'required|array|min:1',
-            ], [
-                'a'.$question['id'].'.required' => __('messages.select_at_least_one_answer'),
-            ]);
 
         } elseif ($question['type'] === 'order') {
-            $selectedOrder = $request->input($question['id'], []);
-            $correctOrder = [];
 
-            foreach ($question['answers'] as $answer) {
-                if (isset($answer['order'])) {
-                    $correctOrder[$answer['id']] = $answer['order'];
-                }
-            }
-            $validAnswerIds = array_column($question['answers'], 'id');
-            foreach ($selectedOrder as $answerId => $selectedPosition) {
-                if (! in_array($answerId, $validAnswerIds)) {
-                    return redirect()->back()->withErrors([
-                        $question['id'] => __('messages.invalid_answer_selected'),
-                    ]);
-                }
-            }
-
-            $isCorrect = true;
-
-            $selectedOrder = array_filter($selectedOrder);
-
-            if (empty($selectedOrder)) {
-                return redirect()->back()->withErrors([
-                    $question['id'] => __('messages.select_at_least_one_answer'),
+            if ($error = $this->processOrderQuestion($request, $attempt, $question)) {
+                return back()->withErrors([
+                    $question['id'] => $error,
                 ]);
             }
-            $uniqueOrderNumbers = array_unique($selectedOrder);
 
-            if (count($selectedOrder) !== count($uniqueOrderNumbers)) {
-                return redirect()->back()->withErrors([
-                    $question['id'] => __('messages.duplicate_order_numbers'),
+        } elseif ($question['type'] === 'image-custom') {
+
+            if ($error = $this->processImageQuestion($request, $attempt, $question)) {
+                return back()->withErrors([
+                    $question['id'] => $error,
                 ]);
             }
-            foreach ($selectedOrder as $answerId => $selectedPosition) {
-                if (isset($correctOrder[$answerId]) && $selectedPosition != $correctOrder[$answerId]) {
-                    $isCorrect = false;
-                    break;
-                }
-            }
-        }if ($question['type'] === 'image-custom') {
-            $validationRules = [];
-            $customAnswers = [];
 
-            foreach ($question['answers'] as $answer) {
-                $answerId = $answer['id'];
-                $validationRules["answer_$answerId"] = 'required|string';
-                $customAnswers[$answer['id']] = $request->input("answer_$answerId");
-            }
-            $request->validate($validationRules, [
-                'required' => __('messages.image_custom_field_required'),
-            ]);
-
-            if (in_array('', $customAnswers)) {
-                return redirect()->back()->withErrors([
-                    $question['id'] => __('messages.image_custom_field_empty'),
-                ]);
-            }
         }
 
-        if ($question['type'] === 'single-choice') {
-            $result = Result::where('attempt_id', $pk)
-                ->where('question', $question['text'])
-                ->where('question_id', $question['id'])
-                ->first();
+        $attempt->update([
+            'correct_answer_count' => $attempt->result()->where('is_correct', true)->count()
+        ]);
 
-            if ($result) {
-                $result->update([
-                    'answer' => $request->input('answer'),
-                    'is_correct' => $question['answers'][$request->input('answer') - 1]['state'] == 1,
-                ]);
-            } else {
-                Result::create([
-                    'attempt_id' => $pk,
-                    'question_id' => $question['id'],
-                    'question' => $question['text'],
-                    'answer' => $request->input('answer'),
-                    'is_correct' => $question['answers'][$request->input('answer') - 1]['state'] == 1,
-                ]);
-            }
-        } elseif ($question['type'] === 'multiple-choice') {
-            $selectedAnswers = $request->input('a'.$question['id'], []);
-            $correctAnswers = [];
-
-            foreach ($question['answers'] as $answer) {
-                if ($answer['state']) {
-                    $correctAnswers[] = $answer['id'];
-                }
-            }
-            sort($selectedAnswers);
-            sort($correctAnswers);
-            $isCorrect = $selectedAnswers == $correctAnswers;
-
-            $result = Result::where('attempt_id', $pk)
-                ->where('question', $question['text'])
-                ->where('question_id', $question['id'])
-                ->first();
-
-            if ($result) {
-                $result->update([
-                    'answer' => ($selectedAnswers),
-                    'is_correct' => $isCorrect,
-                ]);
-            } else {
-                Result::create([
-                    'attempt_id' => $pk,
-                    'question_id' => $question['id'],
-                    'question' => $question['text'],
-                    'answer' => ($selectedAnswers),
-                    'is_correct' => $isCorrect,
-                ]);
-            }
-        } elseif ($question['type'] === 'order') {
-            if ($request->has($question['id'])) {
-                $selectedOrder = $request->input($question['id'], []);
-                $correctOrder = [];
-                $isCorrect = true;
-
-                foreach ($question['answers'] as $answer) {
-                    if (isset($answer['order'])) {
-                        $correctOrder[$answer['id']] = $answer['order'];
-                    }
-                }
-
-                if (empty($selectedOrder)) {
-                } else {
-                    foreach ($selectedOrder as $answerId => $selectedPosition) {
-                        if (isset($correctOrder[$answerId]) && $selectedPosition != $correctOrder[$answerId]) {
-                            $isCorrect = false;
-                            break;
-                        }
-                    }
-                }
-                $result = Result::where('attempt_id', $pk)
-                    ->where('question', $question['text'])
-                    ->where('question_id', $question['id'])
-                    ->first();
-
-                if ($result) {
-                    $result->update([
-                        'answer' => empty($selectedOrder) ? null : ($selectedOrder),
-                        'is_correct' => $isCorrect,
-                    ]);
-                } else {
-                    Result::create([
-                        'attempt_id' => $pk,
-                        'question_id' => $question['id'],
-                        'question' => $question['text'],
-                        'answer' => empty($selectedOrder) ? null : ($selectedOrder),
-                        'is_correct' => $isCorrect,
-                    ]);
-                }
-            }
-        }
-        if ($question['type'] === 'image-custom') {
-            $result = Result::where('attempt_id', $pk)
-                ->where('question_id', $question['id'])
-                ->first();
-
-            $customAnswers = [];
-
-            foreach ($question['answers'] as $answer) {
-                $answerId = $answer['id'];
-                $customAnswers[$answer['id']] = $request->input("answer_$answerId");
-            }
-
-            if ($result) {
-                $result->update([
-                    'answer' => ($customAnswers),
-                    'is_correct' => false,
-                ]);
-            } else {
-                Result::create([
-                    'attempt_id' => $pk,
-                    'question_id' => $question['id'],
-                    'question' => $question['text'],
-                    'answer' => ($customAnswers),
-                    'is_correct' => false,
-                ]);
-            }
-        }
-        $correctAnswerCount = $attempt->result()->where('is_correct', true)->count();
-
-        $attempt->update(['correct_answer_count' => $correctAnswerCount]);
-
-        $nextNum = $num + 1;
-
-        return redirect()->route('question', ['pk' => $pk, 'num' => $nextNum, 'lang' => $lang]);
+        return redirect()->route('question', ['pk' => $pk, 'num' => $num + 1, 'lang' => App::currentLocale()]);
     }
 
-    public function finish($lang, int $pk)
+    public function finish(string $lang, int $pk)
     {
+        $this->setCurrentLocale($lang);
+
         $attempt = Attempt::findOrFail($pk);
-        $test = $attempt->test;
-        $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
-        App::setLocale($lang);
-        $questions = $test->getQuestions($lang);
 
-        $totalQuestions = count($questions);
-        $correctAnswerCount = $attempt->correct_answer_count;
-        $percentage = round(($correctAnswerCount / $totalQuestions) * 100);
-        $hasImageCustomQuestion = $test->hasImageCustomQuestion();
+        $questions = $attempt->test->getQuestions(App::currentLocale());
 
-        return view('result', ['hasImageCustomQuestion' => $hasImageCustomQuestion], compact('pk', 'lang', 'test', 'percentage'));
+        $percentage = $questions ? round($attempt->correct_answer_count / count($questions) * 100) : 0;
+
+        return view('result', [
+            'attempt' => $attempt,
+            'percentage' => $percentage,
+            'hasImageCustomQuestion' => $attempt->test->hasImageCustomQuestion(),
+        ]);
     }
 
-    private function sendTestResultEmail(Attempt $attempt, string $lang)
+    private function sendTestResultEmail(Attempt $attempt): void
     {
         try {
-            $testemail = config('app.report_email');
-            Mail::to($testemail)
+            Mail::to(config('app.report_email'))
                 ->cc(['toavakam@gmail.com', 'vladimir@mariner.tech'])
-                ->send(new TestResult($attempt, $lang));
+                ->send(new TestResult($attempt, App::currentLocale()));
         } catch (\Exception $e) {
-            \Log::error('Email sending failed: '.$e->getMessage());
+            Log::error('Email sending failed: '.$e->getMessage(), [
+                'attempt' => $attempt->id,
+            ]);
+        }
+    }
+
+    private function processSingleChoiceQuestion(Request $request, Attempt $attempt, array $question): void
+    {
+        $answerIds = Arr::pluck($question['answers'], 'id');
+
+        $input = $request->validate([
+            'answer' => ['required', Rule::in($answerIds)],
+        ], [
+            'answer.required' => __('messages.select_at_least_one_answer'),
+            'answer.in' => __('messages.invalid_answer_selected'),
+        ]);
+
+        $isCorrect = Arr::get($question, 'answers.'.($input['answer'] - 1).'.state') == 1;
+
+        $this->createOrUpdateResult($attempt, $question, $input['answer'], $isCorrect);
+    }
+
+    private function processMultiChoiceQuestion(Request $request, Attempt $attempt, array $question): ?string
+    {
+        $selectedAnswers = $request->input('a'.$question['id'], []);
+        $validAnswerIds = Arr::pluck($question['answers'], 'id');
+        $invalidAnswers = array_diff($selectedAnswers, $validAnswerIds);
+        if (! empty($invalidAnswers)) {
+            return __('messages.invalid_answer_selected');
+        }
+        $input = $request->validate([
+            'a'.$question['id'] => 'required|array|min:1',
+        ], [
+            'a'.$question['id'].'.required' => __('messages.select_at_least_one_answer'),
+        ]);
+
+        $correctAnswers = [];
+        foreach ($question['answers'] as $answer) {
+            if ($answer['state']) {
+                $correctAnswers[] = $answer['id'];
+            }
+        }
+        sort($selectedAnswers);
+        sort($correctAnswers);
+        $isCorrect = $selectedAnswers == $correctAnswers;
+
+        $this->createOrUpdateResult($attempt, $question, $selectedAnswers, $isCorrect);
+
+        return null;
+    }
+
+    private function processOrderQuestion(Request $request, Attempt $attempt, array $question): ?string
+    {
+        $selectedOrder = array_filter(Arr::wrap($request->input($question['id'], [])));
+        if (empty($selectedOrder)) {
+            return __('messages.select_at_least_one_answer');
+        }
+
+        $correctOrder = [];
+        foreach ($question['answers'] as $answer) {
+            if (isset($answer['order'])) {
+                $correctOrder[$answer['id']] = $answer['order'];
+            }
+        }
+        $validAnswerIds = array_column($question['answers'], 'id');
+        foreach ($selectedOrder as $answerId => $selectedPosition) {
+            if (! in_array($answerId, $validAnswerIds)) {
+                return __('messages.invalid_answer_selected');
+            }
+        }
+
+        $uniqueOrderNumbers = array_unique($selectedOrder);
+        if (count($selectedOrder) !== count($uniqueOrderNumbers)) {
+            return __('messages.duplicate_order_numbers');
+        }
+
+        $isCorrect = true;
+        foreach ($selectedOrder as $answerId => $selectedPosition) {
+            if (isset($correctOrder[$answerId]) && $selectedPosition != $correctOrder[$answerId]) {
+                $isCorrect = false;
+                break;
+            }
+        }
+
+        $this->createOrUpdateResult($attempt, $question, $selectedOrder, $isCorrect);
+
+        return null;
+    }
+
+    private function processImageQuestion(Request $request, Attempt $attempt, array $question): ?string
+    {
+        $validationRules = [];
+        $customAnswers = [];
+
+        foreach ($question['answers'] as $answer) {
+            $answerId = $answer['id'];
+            $validationRules["answer_$answerId"] = 'required|string';
+            $customAnswers[$answer['id']] = $request->input("answer_$answerId");
+        }
+        $request->validate($validationRules, [
+            'required' => __('messages.image_custom_field_required'),
+        ]);
+
+        if (in_array('', $customAnswers)) {
+            return __('messages.image_custom_field_empty');
+        }
+
+        $this->createOrUpdateResult($attempt, $question, $customAnswers, false);
+
+        return null;
+    }
+
+    protected function createOrUpdateResult(Attempt $attempt, array $question, $answer, bool $isCorrect): void
+    {
+        $result = $attempt->result()->where('question_id', $question['id'])->first();
+        if ($result) {
+            $result->update([
+                'answer' => $answer,
+                'is_correct' => $isCorrect,
+            ]);
+        } else {
+            Result::create([
+                'attempt_id' => $attempt->id,
+                'question_id' => $question['id'],
+                'question' => $question['text'],
+                'answer' => $answer,
+                'is_correct' => $isCorrect,
+            ]);
         }
     }
 }
