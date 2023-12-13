@@ -13,29 +13,29 @@ use Illuminate\Validation\Rule;
 
 class AttemptController extends Controller
 {
-    public function question($lang, int $pk, int $num = 1)
+    public function question(string $lang, int $pk, int $num = 1)
     {
+        $this->setCurrentLocale($lang);
 
         $attempt = Attempt::findOrFail($pk);
         $test = $attempt->test;
-        $lang = array_key_exists($lang, config('app.languages')) ? $lang : 'lv';
-
-        App::setLocale($lang);
 
         $shuffledQuestions = $attempt->QuestionOrder;
 
         if (! ($question = Arr::get($shuffledQuestions, $num - 1))) {
             $this->sendTestResultEmail($attempt, $lang);
+
             return to_route('finish', ['pk' => $pk, 'lang' => $lang]);
         }
+
         if (in_array($question['type'], ['single-choice', 'multiple-choice', 'order'])) {
             shuffle($question['answers']);
         }
 
-        $result = $attempt->result()->where('question_id', $question['id'])->first();
-        $userAnswer = $result ? $result->answer : null;
+        $userAnswer = $attempt->result()->where('question_id', $question['id'])->first()?->answer;
+
         $bar = count($shuffledQuestions);
-        $percentage = ($num / $bar) * 100;
+        $percentage = $bar ? ($num / $bar) * 100 : 0;
 
         return view('questions', compact('question', 'pk', 'num', 'lang', 'test', 'userAnswer', 'bar', 'percentage', 'attempt'));
     }
@@ -51,7 +51,6 @@ class AttemptController extends Controller
         $questions = $attempt->QuestionOrder;
 
         if (! ($question = Arr::get($questions, $num - 1))) {
-
 
             return redirect()->route('finish', ['pk' => $pk]);
         }
@@ -276,21 +275,20 @@ class AttemptController extends Controller
 
     public function finish($lang, int $pk)
     {
-            $attempt = Attempt::findOrFail($pk);
-            $test = $attempt->test;
-            $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
-            App::setLocale($lang);
-            $questions = $test->getQuestions($lang);
+        $attempt = Attempt::findOrFail($pk);
+        $test = $attempt->test;
+        $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
+        App::setLocale($lang);
+        $questions = $test->getQuestions($lang);
 
-            $totalQuestions = count($questions);
-            $correctAnswerCount = $attempt->correct_answer_count;
-            $percentage = round(($correctAnswerCount / $totalQuestions) * 100);
-            $hasImageCustomQuestion = $test->hasImageCustomQuestion();
-            
-
+        $totalQuestions = count($questions);
+        $correctAnswerCount = $attempt->correct_answer_count;
+        $percentage = round(($correctAnswerCount / $totalQuestions) * 100);
+        $hasImageCustomQuestion = $test->hasImageCustomQuestion();
 
         return view('result', ['hasImageCustomQuestion' => $hasImageCustomQuestion], compact('pk', 'lang', 'test', 'percentage'));
     }
+
     private function sendTestResultEmail(Attempt $attempt, string $lang)
     {
         try {
@@ -299,9 +297,7 @@ class AttemptController extends Controller
                 ->cc(['toavakam@gmail.com', 'vladimir@mariner.tech'])
                 ->send(new TestResult($attempt, $lang));
         } catch (\Exception $e) {
-            \Log::error('Email sending failed: ' . $e->getMessage());
+            \Log::error('Email sending failed: '.$e->getMessage());
         }
     }
 }
-
-

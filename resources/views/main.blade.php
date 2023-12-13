@@ -1,6 +1,8 @@
 <x-layout>
-    <x-slot name="title">{{ $test->getQuestionsTitle($lang) }}</x-slot>
+    <x-slot name="title">{{ $test->getQuestionsTitle(app()->currentLocale()) }}</x-slot>
+
     <x-header :test="$test" />
+
     <div class="log-in card p-5 shadow-sm">
         <div class="card-body">
             <form action="" method="POST">
@@ -22,5 +24,6 @@
             </form>
         </div>
     </div>
+
     <x-footer :test="$test"/>
 </x-layout>

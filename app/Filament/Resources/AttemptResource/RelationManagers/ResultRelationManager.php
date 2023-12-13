@@ -39,7 +39,7 @@ class ResultRelationManager extends RelationManager
                                 continue;
                             }
                             if (Arr::get($question, 'type') === 'image-custom') {
-                                foreach($question['answers'] as $answer) {
+                                foreach ($question['answers'] as $answer) {
                                     $result[] = $answer['value'].': '.Arr::get($model->answer, $answer['id'], '');
                                 }
                             } else {

@@ -4,74 +4,61 @@ namespace App\Http\Controllers;
 
 use App\Models\Attempt;
 use App\Models\Test;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 
 class TestController extends Controller
 {
-
-    public function home(Request $request, $lang = 'en')
+    public function home(Request $request, $lang = 'lv')
     {
-        $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
-        App::setLocale($lang);
-        
+        $this->setCurrentLocale($lang);
+
+        // TODO: Why ?
         if ($request->isMethod('post')) {
             $testId = $request->input('test');
+
             return redirect()->route('dashboard', ['lang' => $lang, 'pk' => $testId]);
         }
-        
+
         $tests = Test::all();
 
         return view('home', compact('tests'));
     }
-    public function index($lang, int $pk)
+
+    public function index(string $lang, int $pk)
     {
-        $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
-        App::setLocale($lang);
+        $this->setCurrentLocale($lang);
+
         $test = Test::findOrFail($pk);
 
-        return view('main', compact('test', 'lang', 'pk'));
+        return view('main', compact('test'));
     }
 
-    
-
-
-    public function greet(Request $request, $lang, int $pk)
+    public function greet(Request $request, string $lang, int $pk): RedirectResponse
     {
-        $test = Test::findOrFail($pk);
-        $lang = in_array($lang, ['en', 'lv', 'ru']) ? $lang : 'lv';
-        App::setLocale($lang);
+        $this->setCurrentLocale($lang);
 
-        $request->validate([
-            'name' => 'required',
-            'lastname' => 'required',
+        $test = Test::findOrFail($pk);
+
+        $input = $request->validate([
+            'name' => 'required|string|max:250',
+            'lastname' => 'required|string|max:250',
         ]);
-        $questions = $test->getQuestions($lang);
-        shuffle($questions);
+
+        $questions = Arr::shuffle($test->getQuestions(App::currentLocale()));
 
         $attempt = Attempt::create([
-            'name' => $request->input('name'),
-            'lastname' => $request->input('lastname'),
+            'name' => Arr::get($input, 'name'),
+            'lastname' => Arr::get($input, 'lastname'),
             'completed' => false,
-            'question_count' => count($test->getQuestions($lang)),
+            'question_count' => count($questions),
             'correct_answer_count' => 0,
             'test_id' => $test->id,
             'QuestionOrder' => $questions,
         ]);
 
         return to_route('question', ['pk' => $attempt->id, 'num' => 1, 'lang' => $lang]);
-
-    }
-
-    public function question(int $pk, int $num = 0)
-    {
-        $attempt = Attempt::findOrFail($pk);
-        $shuffledQuestions = $attempt->QuestionOrder;
-
-        if ($num > 0 && $num <= count($shuffledQuestions)) {
-            $currentQuestion = $shuffledQuestions[$num - 1];
-
-            return view('questions', compact('currentQuestion', 'num'));
-        }
     }
 }

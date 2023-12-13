@@ -13,18 +13,21 @@
         @if ($errors->any())
             <div class="alert alert-danger">
                 <ul class="mb-0">
-                   @php
-                   $error = $errors->first();
-                   @endphp
-                        @if($error === __('messages.select_at_least_one_answer'))
-                            <li class="questiondescrip">{{ $error }}</li>
-                        @elseif($error === __('messages.duplicate_order_numbers'))
-                            <li class="questiondescrip">{{ $error }}</li>
-                        @elseif($error === __('messages.invalid_answer_selected'))
-                            <li class="questiondescrip">{{ $error }}</li>
-                        @elseif($error === __('messages.image_custom_field_empty'))
-                            <li class="questiondescrip">{{ $error }}</li>
-                        @endif
+                    @foreach($errors as $error)
+                        <li class="questiondescrip">{{ $error }}</li>
+                    @endforeach
+{{--                   @php--}}
+{{--                   $error = $errors->first();--}}
+{{--                   @endphp--}}
+{{--                    @if($error === __('messages.select_at_least_one_answer'))--}}
+{{--                        <li class="questiondescrip">{{ $error }}</li>--}}
+{{--                    @elseif($error === __('messages.duplicate_order_numbers'))--}}
+{{--                        <li class="questiondescrip">{{ $error }}</li>--}}
+{{--                    @elseif($error === __('messages.invalid_answer_selected'))--}}
+{{--                        <li class="questiondescrip">{{ $error }}</li>--}}
+{{--                    @elseif($error === __('messages.image_custom_field_empty'))--}}
+{{--                        <li class="questiondescrip">{{ $error }}</li>--}}
+{{--                    @endif--}}
                 </ul>
             </div>
         @endif

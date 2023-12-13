@@ -3,30 +3,27 @@
 namespace App\Mail;
 
 use App\Models\Attempt;
-use App\Models\Test;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\App;
-
-
 
 class TestResult extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $formatAnswers;
+
     public function __construct(
         public Attempt $attempt, $lang
     ) {
 
     }
+
     public function envelope(): Envelope
     {
         return new Envelope(
@@ -48,7 +45,6 @@ class TestResult extends Mailable
             ->with('formatAnswers', $this->formatAnswers);
     }
 
-
     /**
      * Get the attachments for the message.
      *
@@ -58,7 +54,7 @@ class TestResult extends Mailable
     {
         $pdf = PDF::loadView('email.test_result_pdf', [
             'attempt' => $this->attempt,
-            'formatAnswers' => $this->formatAnswers
+            'formatAnswers' => $this->formatAnswers,
         ]);
 
         $pdfContent = $pdf->output();
@@ -68,6 +64,7 @@ class TestResult extends Mailable
                 ->withMime('application/pdf'),
         ];
     }
+
     private function formatAnswers(): array
     {
         $test = $this->attempt->QuestionOrder;
@@ -84,7 +81,7 @@ class TestResult extends Mailable
 
                 if (Arr::get($question, 'type') === 'image-custom') {
                     foreach ($question['answers'] as $answer) {
-                        $formatAnswer[] = $answer['value'] . ': ' . Arr::get($result->answer, $answer['id'], '');
+                        $formatAnswer[] = $answer['value'].': '.Arr::get($result->answer, $answer['id'], '');
                     }
                 } else {
                     $allAnswers = Arr::get($question, 'answers', []);
@@ -93,7 +90,7 @@ class TestResult extends Mailable
                     foreach ($allAnswers as $item) {
                         if (in_array(Arr::get($item, 'id'), $answers, false)) {
                             $prefix = Arr::get($question, 'type') === 'order' ? "$i. " : '';
-                            $formatAnswer[] = $prefix . Arr::get($item, 'value');
+                            $formatAnswer[] = $prefix.Arr::get($item, 'value');
                             $i++;
                         }
                     }

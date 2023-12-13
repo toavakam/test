@@ -27,30 +27,28 @@ class Footer extends Component
     }
 
     private function getLanguageMenu(): array
-{
-    $lang = Request::input('lang');
-    $routeName = Route::currentRouteName();
-    $result = [];
+    {
+        $lang = Request::input('lang');
+        $routeName = Route::currentRouteName();
+        $result = [];
 
-    foreach (config('app.languages') as $code => $name) {
-        if ($code === App::currentLocale()) {
-            continue;
+        foreach (config('app.languages') as $code => $name) {
+            if ($code === App::currentLocale()) {
+                continue;
+            }
+
+            if ($routeName === 'dashboard' && $this->test !== null) {
+                $params = ['lang' => $code, 'pk' => $this->test->id];
+            } else {
+                $params = ['lang' => $code, 'pk' => null];
+            }
+
+            $result[] = [
+                route($routeName, $params),
+                $name,
+            ];
         }
 
-        if ($routeName === 'dashboard' && $this->test !== null) {
-            $params = ['lang' => $code, 'pk' => $this->test->id];
-        } else {
-            $params = ['lang' => $code, 'pk' => null];
-        }
-
-        $result[] = [
-            route($routeName, $params),
-            $name,
-        ];
+        return $result;
     }
-
-    return $result;
-}
-
-
 }
