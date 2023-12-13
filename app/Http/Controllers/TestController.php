@@ -33,9 +33,6 @@ class TestController extends Controller
         return view('main', compact('test', 'lang', 'pk'));
     }
 
-    
-
-
     public function greet(Request $request, $lang, int $pk)
     {
         $test = Test::findOrFail($pk);
