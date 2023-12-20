@@ -14,14 +14,12 @@ class TestController extends Controller
     public function home(Request $request, $lang = 'lv')
     {
         $this->setCurrentLocale($lang);
-
-        // TODO: Why ?
+        
         if ($request->isMethod('post')) {
             $testId = $request->input('test');
 
             return redirect()->route('dashboard', ['lang' => $lang, 'pk' => $testId]);
         }
-
         $tests = Test::all();
 
         return view('home', compact('tests'));

@@ -1,6 +1,11 @@
 @props(['question', 'pk', 'num', 'userAnswer'])
 
 <h1 class="questiontext">{{ $question['text'] }}</h1>
+@if(isset($question['image']))
+<div class="text-center">
+    <img class="align-items-center" src="{{ $question['image'] }}" alt="Question Image">
+</div>
+@endif
 <p class="questiondescrip">{{ $question['description'] }}</p>
 <form method="post" action="{{ route('answer', ['pk' => $pk, 'num' => $num, 'lang' => app()->currentLocale()]) }}">
     @csrf
