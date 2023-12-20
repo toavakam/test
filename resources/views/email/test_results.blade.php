@@ -16,4 +16,14 @@
             <li class="{{ $answerClass }}">{!! $answer !!}</li>
         @endforeach
     </ul>
+
+    <ul>
+        @if($formatAnswer['isCorrect'] !== 'Correct')
+            <p>Pareizas atbildes</p>
+    @foreach(explode('<br>', $formatAnswer['correctAnswers']) as $answer)
+        <li class="correct">{!! $answer !!}</li>
+    @endforeach
+        @endif
+    </ul>
+
 @endforeach

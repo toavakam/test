@@ -49,7 +49,7 @@ class AttemptController extends Controller
 
         $question = Arr::get($attempt->QuestionOrder, $num - 1);
         if (! $question) {
-            $this->sendTestResultEmail($attempt);
+
 
             return redirect()->route('finish', ['pk' => $pk]);
         }
@@ -95,7 +95,7 @@ class AttemptController extends Controller
         $this->setCurrentLocale($lang);
 
         $attempt = Attempt::findOrFail($pk);
-
+        $this->sendTestResultEmail($attempt);
         $questions = $attempt->test->getQuestions(App::currentLocale());
 
         $percentage = $questions ? round($attempt->correct_answer_count / count($questions) * 100) : 0;

@@ -15,7 +15,6 @@ class TestController extends Controller
     {
         $this->setCurrentLocale($lang);
 
-        // TODO: Why ?
         if ($request->isMethod('post')) {
             $testId = $request->input('test');
 
