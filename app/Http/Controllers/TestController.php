@@ -14,7 +14,7 @@ class TestController extends Controller
     public function home(Request $request, $lang = 'lv')
     {
         $this->setCurrentLocale($lang);
-        
+
         if ($request->isMethod('post')) {
             $testId = $request->input('test');
 
